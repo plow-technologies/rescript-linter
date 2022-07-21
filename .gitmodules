@@ -1,3 +1,3 @@
-[submodule "syntax"]
-	path = vendor/rescript_parser/syntax
+[submodule "rescript_parser/syntax"]
+	path = rescript_parser/syntax
 	url = https://github.com/rescript-lang/syntax
