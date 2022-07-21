@@ -1,2 +1,3 @@
 (library
- (name rescript_linter))
+ (name rescript_linter)
+ (libraries rescript_linter))
