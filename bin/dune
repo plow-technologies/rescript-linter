@@ -1,0 +1,4 @@
+(executable
+ (public_name rescript_linter)
+ (name main)
+ (libraries rescript_linter))
