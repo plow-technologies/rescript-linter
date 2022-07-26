@@ -17,23 +17,16 @@ let p =
 let structure = Res_core.parseImplementation p
 let signature = Res_core.parseSpecification p
 
-let parse acc item =
-  match item with
-  | () -> acc
-
-let getIterator _callback =
-  {
-    Ast_iterator.default_iterator with
-    structure =
-      (fun iterator structure -> Ast_iterator.default_iterator.structure iterator structure);
-    expr =
-      (fun iterator expr ->
-        (match expr with
-        | {pexp_desc = Pexp_constant (Parsetree.Pconst_integer(_, _))} -> print_endline "Found integer constant"
-        | _ -> ()
-        );
-        Ast_iterator.default_iterator.expr iterator expr);
-  }
+let printError src msg d =
+  Res_diagnostics_printing_utils.Super_location.super_error_reporter
+    Format.err_formatter src
+    Location.
+      {
+        loc = {loc_start = d.loc_start; loc_end = d.loc_end; loc_ghost = false};
+        msg = msg;
+        sub = [];
+        if_highlight = "";
+      }
 
 let withStructure _src iterator f =
   {
@@ -44,12 +37,16 @@ let withStructure _src iterator f =
          iterator.Ast_iterator.structure iterator1 structure);
   }
 
-let withExpression _src iterator f =
+let withExpression src iterator f =
   {
     iterator with
     Ast_iterator.expr =
        (fun iterator1 expr ->
-         let _ = f expr in
+         let res = f expr in
+         (match res with
+         | Rule.LintError(msg, loc) -> printError src msg loc
+         | Rule.LintOk -> ()
+         );
          iterator.Ast_iterator.expr iterator1 expr);
   }
 
@@ -81,7 +78,7 @@ end)
 
 let rules =
   [ (module DisallowStringOfIntRule : Rule.HASRULE)
-  ; (module DisallowStringOfIntRule : Rule.HASRULE)
+  ; (module DisallowIntOfStringOptRule : Rule.HASRULE)
   ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
   ]
 
@@ -97,7 +94,6 @@ let makeIterator p =
 let run = match p.diagnostics with
 | [] ->
     let iterator = makeIterator p in
-    let () = iterator.structure iterator structure in
-    print_endline "No problem"
+    iterator.structure iterator structure
 | diagnostics -> (* parser contains problems *)
   Res_diagnostics.printReport diagnostics src

@@ -5,7 +5,7 @@ type _ modifier =
   | MStructure : Parsetree.structure modifier
 
 type lintResult =
-  | LintError of string
+  | LintError of string * Location.t
   | LintOk
 
 type meta =

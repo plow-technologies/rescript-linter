@@ -7,17 +7,6 @@ module Options = struct
     }
 end
 
-let printError src msg _d =
-    Res_diagnostics_printing_utils.Super_location.super_error_reporter
-      Format.err_formatter src
-      Location.
-        {
-          loc = {loc_start = Lexing.dummy_pos; loc_end = Lexing.dummy_pos; loc_ghost = false};
-          msg = msg;
-          sub = [];
-          if_highlight = "";
-        };
-
 module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE with type t = Parsetree.expression = struct
   let description =
     match OPT.options.suggested_function with
@@ -36,11 +25,10 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASR
   let lint expr =
         (match expr with
         (* matches string_of_int(x) *)
-        | {Parsetree.pexp_desc = Pexp_apply ({pexp_desc = Pexp_ident {txt = Longident.Lident ident}}, _)} when ident = function_name ->
-            print_endline meta.ruleDescription;
-            Rule.LintOk
+        | {Parsetree.pexp_desc = Pexp_apply ({pexp_desc = Pexp_ident {txt = Longident.Lident ident}}, _); Parsetree.pexp_loc = loc} when ident = function_name ->
+            Rule.LintError(meta.ruleDescription, loc)
         (* matches x->string_of_int *)
-        | {Parsetree.pexp_desc = Pexp_apply (_, xs)} ->
+        | {Parsetree.pexp_desc = Pexp_apply (_, xs); Parsetree.pexp_loc = loc} ->
             let f expr =
               (match expr with
               | (Asttypes.Nolabel, {Parsetree.pexp_desc = Pexp_ident {txt = Longident.Lident ident }}) when ident = function_name -> true
@@ -49,9 +37,7 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASR
             let results = List.find_all f xs in
             (match results with
             | [] -> Rule.LintOk
-            | _ ->
-                print_endline meta.ruleDescription;
-                Rule.LintOk
+            | _ -> Rule.LintError(meta.ruleDescription, loc)
             );
         | _ -> Rule.LintOk
         );
