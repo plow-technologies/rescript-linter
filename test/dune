@@ -1,2 +1,3 @@
 (test
- (name rescript_linter))
+ (name rescript_linter)
+ (libraries alcotest rescript_linter))
