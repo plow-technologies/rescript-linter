@@ -1,3 +1,4 @@
+open Rescript_parser
 open Rescript_linter
 
 module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
@@ -8,30 +9,34 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
     ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 
-module To_test = struct
-  let lowercase = String.lowercase_ascii
+let parseAst path =
+  let src = Linter.processFile path in
+  (* if you want to target the printer use: let mode = Res_parser.Default in*)
+  let p = Res_parser.make ~mode:Res_parser.Default src path in
+  Res_core.parseImplementation p
 
-  let capitalize = String.capitalize_ascii
+module Tests = struct
+  (* The tests *)
+  let disallow_test_1 () =
+    let ast = parseAst "testData/disallowed_function_rule_test_1.res" in
+    let errors = Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] ast in
+    match errors with
+    | [(msg, _); _] ->
+        Alcotest.(check string) "Same error message" DisallowStringOfIntRule.meta.ruleDescription msg
+    | _ -> Alcotest.fail "Should only have two lint errors"
 
-  let str_concat = String.concat ""
-
-  let list_concat = List.append
+  let disallow_test_2 () =
+    let ast = parseAst "testData/disallowed_function_rule_test_2.res" in
+    let errors = Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] ast in
+    match errors with
+    | [] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should not have any lint errors"
 end
-
-(* The tests *)
-let test_lowercase () = Alcotest.(check string) "same string" "hello!" (To_test.lowercase "hELLO!")
-
-let test_capitalize () = Alcotest.(check string) "same string" "World." (To_test.capitalize "world.")
-
-let test_str_concat () = Alcotest.(check string) "same string" "foobar" (To_test.str_concat ["foo"; "bar"])
-
-let test_list_concat () = Alcotest.(check (list int)) "same lists" [1; 2; 3] (To_test.list_concat [1] [2; 3])
 
 (* Run it *)
 let () =
   let open Alcotest in
-  run "Utils"
-    [ ( "string-case"
-      , [test_case "Lower case" `Quick test_lowercase; test_case "Capitalization" `Quick test_capitalize] )
-    ; ("string-concat", [test_case "String mashing" `Quick test_str_concat])
-    ; ("list-concat", [test_case "List mashing" `Slow test_list_concat]) ]
+  run "ReScript Linter"
+    [ ( "DisallowFunctionRule"
+      , [ test_case "Lint only functions" `Quick Tests.disallow_test_1
+        ; test_case "Does not lint variable with the same function name" `Quick Tests.disallow_test_2 ] ) ]
