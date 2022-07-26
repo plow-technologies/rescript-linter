@@ -62,8 +62,27 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make(struct
     }
 end)
 
+module DisallowIntOfStringOptRule = DisallowedFunctionRule.Make(struct
+  type options = DisallowedFunctionRule.Options.options
+  let options =
+    { DisallowedFunctionRule.Options.disallowed_function = "intOfStringOpt"
+    ; DisallowedFunctionRule.Options.suggested_function = Some "Belt.Int.fromString"
+    }
+end)
+
+
+module DisallowFloatOfStringOptRule = DisallowedFunctionRule.Make(struct
+  type options = DisallowedFunctionRule.Options.options
+  let options =
+    { DisallowedFunctionRule.Options.disallowed_function = "floatOfStringOpt"
+    ; DisallowedFunctionRule.Options.suggested_function = Some "Belt.Float.fromString"
+    }
+end)
+
 let rules =
   [ (module DisallowStringOfIntRule : Rule.HASRULE)
+  ; (module DisallowStringOfIntRule : Rule.HASRULE)
+  ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
   ]
 
 let makeIterator =
