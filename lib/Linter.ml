@@ -17,8 +17,16 @@ let p =
 let structure = Res_core.parseImplementation p
 let signature = Res_core.parseSpecification p
 
+let printError ppf src ({loc; msg} : Location.error) =
+  Res_diagnostics_printing_utils.Super_location.setup_colors ();
+  (* open a vertical box. Everything in our message is indented 2 spaces *)
+  (* Format.fprintf ppf "@[<v>@,  %a@,  %s@,@]" (print ~message_kind:`error "We've found a bug for you!") src loc msg; *)
+  Format.fprintf ppf "@[<v>@,  %a@,  %s@,@]"
+    (Res_diagnostics_printing_utils.Super_location.print ~message_kind:`error "Lint error!" src)
+    loc msg
+
 let printError src msg d =
-  Res_diagnostics_printing_utils.Super_location.super_error_reporter
+  printError
     Format.err_formatter src
     Location.
       {
