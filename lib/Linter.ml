@@ -10,8 +10,7 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
 
   let options =
     { DisallowedFunctionRule.Options.disallowed_function= "string_of_int"
-    ; DisallowedFunctionRule.Options.suggested_function=
-        Some "Belt.Int.fromString" }
+    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 
 module DisallowIntOfStringOptRule = DisallowedFunctionRule.Make (struct
@@ -19,8 +18,7 @@ module DisallowIntOfStringOptRule = DisallowedFunctionRule.Make (struct
 
   let options =
     { DisallowedFunctionRule.Options.disallowed_function= "intOfStringOpt"
-    ; DisallowedFunctionRule.Options.suggested_function=
-        Some "Belt.Int.fromString" }
+    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 
 module DisallowFloatOfStringOptRule = DisallowedFunctionRule.Make (struct
@@ -28,8 +26,7 @@ module DisallowFloatOfStringOptRule = DisallowedFunctionRule.Make (struct
 
   let options =
     { DisallowedFunctionRule.Options.disallowed_function= "floatOfStringOpt"
-    ; DisallowedFunctionRule.Options.suggested_function=
-        Some "Belt.Float.fromString" }
+    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Float.fromString" }
 end)
 
 let rules =
@@ -44,9 +41,16 @@ let lint path =
   let p = Res_parser.make ~mode:Res_parser.Default src path in
   let structure = Res_core.parseImplementation p in
   match p.diagnostics with
-  | [] ->
-      let iterator = Iterator.makeIterator p rules in
-      iterator.structure iterator structure
+  | [] -> (
+      let errors = ref [] in
+      let callback (pair : string * Location.t) = errors := !errors @ [pair] in
+      let iterator = Iterator.makeIterator rules callback in
+      iterator.structure iterator structure ;
+      match !errors with
+      | [] -> print_endline "All good"
+      | xs ->
+          let f (msg, loc) = Printer.printError src msg loc in
+          List.iter f xs )
   | diagnostics ->
       (* parser contains problems *)
       Res_diagnostics.printReport diagnostics src
