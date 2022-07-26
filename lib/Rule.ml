@@ -20,6 +20,11 @@ module type HASRULE = sig
   val lint : t -> lintResult
 end
 
+module type OPTIONS = sig
+  type options
+  val options : options
+end
+
 (*
 module type HasRule2 = sig
   type t

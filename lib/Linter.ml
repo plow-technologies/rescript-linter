@@ -53,8 +53,17 @@ let withExpression iterator f =
          iterator.Ast_iterator.expr iterator1 expr);
   }
 
+
+module DisallowStringOfIntRule = DisallowedFunctionRule.Make(struct
+  type options = DisallowedFunctionRule.Options.options
+  let options =
+    { DisallowedFunctionRule.Options.disallowed_function = "string_of_int"
+    ; DisallowedFunctionRule.Options.suggested_function = Some "Belt.Int.fromString"
+    }
+end)
+
 let rules =
-  [ (module DisallowedFunctionRule.Rule : Rule.HASRULE)
+  [ (module DisallowStringOfIntRule : Rule.HASRULE)
   ]
 
 let makeIterator =
