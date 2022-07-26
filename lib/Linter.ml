@@ -35,9 +35,40 @@ let getIterator _callback =
         Ast_iterator.default_iterator.expr iterator expr);
   }
 
+let withStructure iterator f =
+  {
+    iterator with
+    Ast_iterator.structure =
+       (fun iterator1 structure ->
+         let _ = f structure in
+         iterator.Ast_iterator.structure iterator1 structure);
+  }
+
+let withExpression iterator f =
+  {
+    iterator with
+    Ast_iterator.expr =
+       (fun iterator1 expr ->
+         let _ = f expr in
+         iterator.Ast_iterator.expr iterator1 expr);
+  }
+
+let rules =
+  [ (module DisallowedFunctionRule.Rule : Rule.HASRULE)
+  ]
+
+let makeIterator =
+  let f iterator rule =
+    let module R = (val rule : Rule.HASRULE) in
+    (match R.proxy with
+    | Rule.MExpression -> withExpression iterator R.lint
+    | Rule.MStructure -> withStructure iterator R.lint
+    ) in
+  List.fold_left f Ast_iterator.default_iterator rules
+
 let run = match p.diagnostics with
 | [] ->
-    let iterator = getIterator (fun _ -> ()) in
+    let iterator = makeIterator in
     let () = iterator.structure iterator structure in
     print_endline "No problem"
 | diagnostics -> (* parser contains problems *)

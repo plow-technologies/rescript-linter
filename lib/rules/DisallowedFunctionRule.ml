@@ -1,9 +1,20 @@
-module Implementation : HasRule.HasRule = struct
+open Rescript_parser
+
+module Implementation : Rule.HASRULE with type t = Parsetree.expression = struct
+  type t = Parsetree.expression
+  let proxy = Rule.MExpression
   let meta =
-    { HasRule.ruleName = "DisallowedFunction"
-    ; HasRule.ruleDescription = "Disallow certain functions from running"
+    { Rule.ruleName = "DisallowedFunction"
+    ; Rule.ruleDescription = "Disallow certain functions from running"
     }
-  let lint _ast = ()
+
+  let lint expr =
+        (match expr with
+        | {Parsetree.pexp_desc = Pexp_constant (Parsetree.Pconst_integer(_, _))} ->
+            print_endline "Found integer constant";
+            Rule.LintOk
+        | _ -> Rule.LintOk
+        );
 end
 
-module Rule = HasRule.MakeRule (Implementation)
+module Rule = Rule.Make (Implementation)
