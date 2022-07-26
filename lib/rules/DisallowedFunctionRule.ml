@@ -7,6 +7,17 @@ module Options = struct
     }
 end
 
+let printError src msg _d =
+    Res_diagnostics_printing_utils.Super_location.super_error_reporter
+      Format.err_formatter src
+      Location.
+        {
+          loc = {loc_start = Lexing.dummy_pos; loc_end = Lexing.dummy_pos; loc_ghost = false};
+          msg = msg;
+          sub = [];
+          if_highlight = "";
+        };
+
 module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE with type t = Parsetree.expression = struct
   let description =
     match OPT.options.suggested_function with

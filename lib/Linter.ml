@@ -35,7 +35,7 @@ let getIterator _callback =
         Ast_iterator.default_iterator.expr iterator expr);
   }
 
-let withStructure iterator f =
+let withStructure _src iterator f =
   {
     iterator with
     Ast_iterator.structure =
@@ -44,7 +44,7 @@ let withStructure iterator f =
          iterator.Ast_iterator.structure iterator1 structure);
   }
 
-let withExpression iterator f =
+let withExpression _src iterator f =
   {
     iterator with
     Ast_iterator.expr =
@@ -85,18 +85,18 @@ let rules =
   ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
   ]
 
-let makeIterator =
+let makeIterator p =
   let f iterator rule =
     let module R = (val rule : Rule.HASRULE) in
     (match R.proxy with
-    | Rule.MExpression -> withExpression iterator R.lint
-    | Rule.MStructure -> withStructure iterator R.lint
+    | Rule.MExpression -> withExpression p.Res_parser.scanner.src iterator R.lint
+    | Rule.MStructure -> withStructure p.Res_parser.scanner.src iterator R.lint
     ) in
   List.fold_left f Ast_iterator.default_iterator rules
 
 let run = match p.diagnostics with
 | [] ->
-    let iterator = makeIterator in
+    let iterator = makeIterator p in
     let () = iterator.structure iterator structure in
     print_endline "No problem"
 | diagnostics -> (* parser contains problems *)
