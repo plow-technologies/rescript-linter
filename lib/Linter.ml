@@ -5,19 +5,6 @@ let processFile path =
   let src = really_input_string channel (in_channel_length channel) in
   close_in channel ; src
 
-let filename = "./test/foo.res"
-
-let src = processFile filename
-
-let p =
-  (* if you want to target the printer use: let mode = Res_parser.Default
-     in*)
-  Res_parser.make ~mode:Res_parser.Default src filename
-
-let structure = Res_core.parseImplementation p
-
-let signature = Res_core.parseSpecification p
-
 module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
   type options = DisallowedFunctionRule.Options.options
 
@@ -51,7 +38,11 @@ let rules =
   ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
   ; (module NoJStringInterpolation.Rule : Rule.HASRULE) ]
 
-let run =
+let lint path =
+  let src = processFile path in
+  (* if you want to target the printer use: let mode = Res_parser.Default in*)
+  let p = Res_parser.make ~mode:Res_parser.Default src path in
+  let structure = Res_core.parseImplementation p in
   match p.diagnostics with
   | [] ->
       let iterator = Iterator.makeIterator p rules in

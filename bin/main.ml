@@ -1,3 +1,6 @@
 open Rescript_linter
 
-let () = Linter.run
+
+let filename = "./test/foo.res"
+
+let () = Linter.lint filename
