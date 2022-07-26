@@ -20,18 +20,6 @@ module type HASRULE = sig
   val lint : t -> lintResult
 end
 
-module type IsRule = sig
-  val meta : meta
-  val lint : 'a -> lintResult
-end
-
-module Make (R : HASRULE) : HASRULE = struct
-  type t = R.t
-  let proxy = R.proxy
-  let meta = R.meta
-  let lint = R.lint
-end
-
 (*
 module type HasRule2 = sig
   type t

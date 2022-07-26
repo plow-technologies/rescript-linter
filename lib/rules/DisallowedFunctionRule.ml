@@ -1,6 +1,6 @@
 open Rescript_parser
 
-module Implementation : Rule.HASRULE with type t = Parsetree.expression = struct
+module Rule : Rule.HASRULE with type t = Parsetree.expression = struct
   type t = Parsetree.expression
   let proxy = Rule.MExpression
   let meta =
@@ -16,5 +16,3 @@ module Implementation : Rule.HASRULE with type t = Parsetree.expression = struct
         | _ -> Rule.LintOk
         );
 end
-
-module Rule = Rule.Make (Implementation)
