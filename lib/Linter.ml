@@ -83,7 +83,8 @@ end)
 let rules =
   [ (module DisallowStringOfIntRule : Rule.HASRULE)
   ; (module DisallowIntOfStringOptRule : Rule.HASRULE)
-  ; (module DisallowFloatOfStringOptRule : Rule.HASRULE) ]
+  ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
+  ; (module NoJStringInterpolation.Rule : Rule.HASRULE) ]
 
 let makeIterator p =
   let f iterator rule =
