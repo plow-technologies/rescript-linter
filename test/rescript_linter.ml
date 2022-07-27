@@ -9,6 +9,14 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
     ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 
+module DisallowTriangleOperatorRule = DisallowedOperatorRule.Make (struct
+  type options = DisallowedOperatorRule.Options.options
+
+  let options =
+    { DisallowedOperatorRule.Options.disallowed_operator= "|>"
+    ; DisallowedOperatorRule.Options.suggested_operator= Some "->" }
+end)
+
 let parseAst path =
   let src = Linter.processFile path in
   (* if you want to target the printer use: let mode = Res_parser.Default in*)
@@ -32,6 +40,14 @@ module Tests = struct
     | [] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should not have any lint errors"
 
+  let disallow_operator_test () =
+    let ast = parseAst "testData/disallowed_operator_rule_test.res" in
+    let errors = Linter.lint [(module DisallowTriangleOperatorRule : Rule.HASRULE)] ast in
+    match errors with
+    | [(msg, _)] ->
+        Alcotest.(check string) "Same error message" DisallowTriangleOperatorRule.meta.ruleDescription msg
+    | _ -> Alcotest.fail "Should not have any lint errors"
+
   let no_jstring_interpolation_test () =
     let ast = parseAst "testData/no_jstring_interpolation_test.res" in
     let errors = Linter.lint [(module NoJStringInterpolation.Rule : Rule.HASRULE)] ast in
@@ -49,4 +65,5 @@ let () =
       , [ test_case "Lint only functions" `Quick Tests.disallow_test_1
         ; test_case "Does not lint variable with the same function name" `Quick Tests.disallow_test_2 ] )
     ; ( "No J String Interpolation Rule"
-      , [test_case "Lint j`` string" `Quick Tests.no_jstring_interpolation_test] ) ]
+      , [test_case "Lint j`` string" `Quick Tests.no_jstring_interpolation_test] )
+    ; ("Disallow |> operator", [test_case "Lint |> operator" `Quick Tests.disallow_operator_test]) ]
