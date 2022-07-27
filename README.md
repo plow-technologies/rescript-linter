@@ -1,0 +1,140 @@
+# ReScript Parser
+
+## Building the project
+
+```
+git submodule update --init --recursive
+opam install . --deps-only --with-doc --with-test
+dune build
+```
+
+### To run the test
+
+```
+dune runtest
+```
+
+## Running the parser
+
+Once you build the project, you can copy the resulting binary. Or you can also run it with `dune`
+
+```
+dune exec -- rescript_linter foo.res
+```
+
+## Rules
+
+Rules are built-in in the project. Currently there's no pluggable architecture to add third party rule.
+
+Rules are defined in `lib/rules`.
+
+Currently, there are two rules available
+
+1. `DisallowedFunctionRule` - Disallow the use of certain functions
+2. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
+
+### Writing your own rule
+
+By convention, you should write a new rule on its own module in `lib/rules`.
+
+#### Rule interface
+
+Each rule module must have the signature of `Rule.HASRULE`.
+
+```ocaml
+module type HASRULE = sig
+  type t
+  val proxy : t modifier
+  val meta : meta
+  val lint : t -> lintResult
+end
+```
+
+- `meta` allows you to define name and the rule description
+- `proxy` and `type t` should be based on the type of AST that you would like to capture
+- then you should write the `lint` function that receive the AST based on type `t` and this function should return either `LintOk` or `LintError`
+
+#### Rule with options
+
+Some rule can be designed such a way that it can be generic and user can specify options in order to create a specific rule. For example, our `DisallowedFunctionRule` is a generic rule and you can specify the function name through its option.
+
+There is a module signature that you would have to follow to add options to a rule.
+
+```ocaml
+module type OPTIONS = sig
+  type options
+  val options : options
+end
+```
+
+Then you would a create a module functor that accepts the options as its module argument.
+
+```ocaml
+module Options = struct
+  type options = {disallowed_function: string; suggested_function: string option}
+end
+
+module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE with type t = Parsetree.expression = struct
+  ...
+
+  let function_name = OPT.options.Options.disallowed_function
+  ...
+end
+```
+
+**Using the generic rule**
+
+Then you can use the module functor to create a specific rule based on the options that you passed.
+
+```ocaml
+module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
+  type options = DisallowedFunctionRule.Options.options
+
+  let options =
+    { DisallowedFunctionRule.Options.disallowed_function= "string_of_int"
+    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
+end)
+```
+
+### Understanding the AST
+
+#### Printing the AST
+
+It is very useful to print the AST when you're investigating how to write a rule for certain code. Rescript has AST pretty printer that can come handy to convert your Rescript code to its AST.
+
+`test.res`
+```rescript
+let txt = j`hello`
+```
+
+`AST`
+```
+$ rescript -print ast test.res
+[
+  structure_item (test.res[1,0+0]..[1,0+18])
+    Pstr_value Nonrec
+    [
+      <def>
+        pattern (test.res[1,0+4]..[1,0+7])
+          Ppat_var "txt" (test.res[1,0+4]..[1,0+7])
+        expression (test.res[1,0+11]..[1,0+17])
+          attribute "res.template" (_none_[1,0+-1]..[1,0+-1]) ghost
+            []
+          Pexp_constant PConst_string ("hello",Some "j")
+    ]
+]
+```
+
+#### AST
+
+The complete AST types can be found in [https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli](https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli)
+
+The linter currently doesn't handle all cases, for now it only handles `expression` and `structure` AST.
+
+We define GADT `modifier` type that you need to specify as the `proxy` field based on `Rule.HASRULE` signature above.
+
+```ocaml
+type _ modifier = MExpression : Parsetree.expression modifier | MStructure : Parsetree.structure modifier
+```
+
+If you like to parse an expression, then you'd need to choose `MExpression`, same goes with `MStructure`. Which one you'd pick is mostly based on which part you'd like to lint. Playing with print the AST above will help. Most of the time `expression` can take care most of your lint requirement.
