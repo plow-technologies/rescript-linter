@@ -1,10 +1,11 @@
 open Rescript_parser
 
-let withStructure iterator f _callback =
+let withStructure iterator f callback =
   { iterator with
     Ast_iterator.structure=
       (fun iterator1 structure ->
-        let _ = f structure in
+        let res = f structure in
+        (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
         iterator.Ast_iterator.structure iterator1 structure ) }
 
 let withExpression iterator f callback =
