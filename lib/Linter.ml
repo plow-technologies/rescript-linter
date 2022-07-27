@@ -28,7 +28,8 @@ let rules =
   [ (module DisallowStringOfIntRule : Rule.HASRULE)
   ; (module DisallowIntOfStringOptRule : Rule.HASRULE)
   ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
-  ; (module NoJStringInterpolation.Rule : Rule.HASRULE) ]
+  ; (module NoJStringInterpolation.Rule : Rule.HASRULE)
+  ; (module JSXRule.Rule : Rule.HASRULE) ]
 
 let processFile path =
   let channel = open_in_bin path in

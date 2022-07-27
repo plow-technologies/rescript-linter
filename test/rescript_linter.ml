@@ -36,7 +36,8 @@ module Tests = struct
     let ast = parseAst "testData/no_jstring_interpolation_test.res" in
     let errors = Linter.lint [(module NoJStringInterpolation.Rule : Rule.HASRULE)] ast in
     match errors with
-    | [(msg, _)] -> Alcotest.(check pass) "Same error message" NoJStringInterpolation.Rule.meta.ruleDescription msg
+    | [(msg, _)] ->
+        Alcotest.(check pass) "Same error message" NoJStringInterpolation.Rule.meta.ruleDescription msg
     | _ -> Alcotest.fail "Should only return one error"
 end
 
@@ -47,6 +48,5 @@ let () =
     [ ( "Disallow Function Rule"
       , [ test_case "Lint only functions" `Quick Tests.disallow_test_1
         ; test_case "Does not lint variable with the same function name" `Quick Tests.disallow_test_2 ] )
-    ; ( "No J String Interpolation Rule" ,
-       [ test_case "Lint j`` string" `Quick Tests.no_jstring_interpolation_test]
-    )]
+    ; ( "No J String Interpolation Rule"
+      , [test_case "Lint j`` string" `Quick Tests.no_jstring_interpolation_test] ) ]
