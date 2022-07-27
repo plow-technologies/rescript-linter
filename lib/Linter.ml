@@ -24,10 +24,19 @@ module DisallowFloatOfStringOptRule = DisallowedFunctionRule.Make (struct
     ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Float.fromString" }
 end)
 
+module DisallowTriangleOperatorRule = DisallowedOperatorRule.Make (struct
+  type options = DisallowedOperatorRule.Options.options
+
+  let options =
+    { DisallowedOperatorRule.Options.disallowed_operator= "|>"
+    ; DisallowedOperatorRule.Options.suggested_operator= Some "->" }
+end)
+
 let rules =
   [ (module DisallowStringOfIntRule : Rule.HASRULE)
   ; (module DisallowIntOfStringOptRule : Rule.HASRULE)
   ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
+  ; (module DisallowTriangleOperatorRule : Rule.HASRULE)
   ; (module NoJStringInterpolation.Rule : Rule.HASRULE)
   ; (module JSXRule.Rule : Rule.HASRULE) ]
 
