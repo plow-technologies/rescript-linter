@@ -1,6 +1,9 @@
 open Rescript_parser
 
-type _ modifier = MExpression : Parsetree.expression modifier | MStructure : Parsetree.structure modifier
+type _ modifier =
+  | MExpression : Parsetree.expression modifier
+  | MStructure : Parsetree.structure modifier
+  | MPattern : Parsetree.pattern modifier
 
 type lintResult = LintError of string * Location.t | LintOk
 

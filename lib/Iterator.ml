@@ -1,5 +1,13 @@
 open Rescript_parser
 
+let withPattern iterator f callback =
+  { iterator with
+    Ast_iterator.pat=
+      (fun iterator1 pattern ->
+        let res = f pattern in
+        (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
+        iterator.Ast_iterator.pat iterator1 pattern ) }
+
 let withStructure iterator f callback =
   { iterator with
     Ast_iterator.structure=
@@ -22,5 +30,6 @@ let makeIterator rules callback =
     match R.proxy with
     | Rule.MExpression -> withExpression iterator R.lint callback
     | Rule.MStructure -> withStructure iterator R.lint callback
+    | Rule.MPattern -> withPattern iterator R.lint callback
   in
   List.fold_left f Ast_iterator.default_iterator rules
