@@ -22,8 +22,8 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) :
   let lint expr =
     match expr with
     (* matches string_of_int(x) *)
-    | { Parsetree.pexp_desc= Pexp_apply ({pexp_desc= Pexp_ident {txt= Longident.Lident ident}}, _)
-      ; Parsetree.pexp_loc= loc }
+    | { Parsetree.pexp_desc=
+          Pexp_apply ({pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}, _) }
       when ident = function_name ->
         Rule.LintError (meta.ruleDescription, loc)
     (* matches x->string_of_int *)
