@@ -64,7 +64,9 @@ let run path =
       | [] -> print_endline "All good"
       | xs ->
           let f (msg, loc) = Printer.printError src msg loc in
-          List.iter f xs )
+          List.iter f xs );
+          exit 1
   | diagnostics ->
       (* parser contains problems *)
-      Res_diagnostics.printReport diagnostics src
+      Res_diagnostics.printReport diagnostics src;
+      exit 1
