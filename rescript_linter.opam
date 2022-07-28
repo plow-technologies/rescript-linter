@@ -5,9 +5,7 @@ description: "AST-based linter for ReScript"
 maintainer: ["Shulhi Sapli"]
 authors: ["Shulhi Sapli"]
 license: "LICENSE"
-tags: ["topics" "to describe" "your" "project"]
 homepage: "https://github.com/plow-technologies/rescript-linter"
-doc: "https://url/to/documentation"
 bug-reports: "https://github.com/plow-technologies/rescript-linter/issues"
 depends: [
   "ocaml"
