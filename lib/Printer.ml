@@ -10,6 +10,6 @@ let formatMessage ppf src ({loc; msg} : Location.error) =
     loc msg
 
 let printError src msg d =
-  formatMessage Format.err_formatter src
+  formatMessage Format.std_formatter src
     Location.
       {loc= {loc_start= d.loc_start; loc_end= d.loc_end; loc_ghost= false}; msg; sub= []; if_highlight= ""}
