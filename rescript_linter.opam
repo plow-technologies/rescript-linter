@@ -6,9 +6,9 @@ maintainer: ["Shulhi Sapli"]
 authors: ["Shulhi Sapli"]
 license: "LICENSE"
 tags: ["topics" "to describe" "your" "project"]
-homepage: "https://github.com/username/reponame"
+homepage: "https://github.com/plow-technologies/rescript-linter"
 doc: "https://url/to/documentation"
-bug-reports: "https://github.com/username/reponame/issues"
+bug-reports: "https://github.com/plow-technologies/rescript-linter/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.3"}
@@ -28,4 +28,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/username/reponame.git"
+dev-repo: "git+https://github.com/plow-technologies/rescript-linter.git"
