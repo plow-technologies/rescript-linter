@@ -1,4 +1,8 @@
-# ReScript Parser
+# ReScript Linter
+
+An AST based linter for ReScript. Write your rule based on ReScript AST.
+
+[![asciicast](https://asciinema.org/a/f71oYaBZ0tisjpQX7hBeyvuck.svg)](https://asciinema.org/a/f71oYaBZ0tisjpQX7hBeyvuck?autoplay=1&loop=1)
 
 ## Building the project
 
@@ -35,7 +39,7 @@ Rules are built-in in the project. Currently there's no pluggable architecture t
 
 Rules are defined in `lib/rules`.
 
-Currently, there are two rules available
+Currently, there are three rules available
 
 1. `DisallowedFunctionRule` - Disallow the use of certain functions like `string_of_int`
 2. `DisallowedOperatorRule` - Disallow the use of certain operators like `|>`
