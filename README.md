@@ -8,6 +8,13 @@ opam install . --deps-only --with-doc --with-test
 dune build
 ```
 
+or with Nix,
+
+```
+git submodule update --init --recursive
+nix-build
+```
+
 ### To run the test
 
 ```
@@ -30,8 +37,9 @@ Rules are defined in `lib/rules`.
 
 Currently, there are two rules available
 
-1. `DisallowedFunctionRule` - Disallow the use of certain functions
-2. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
+1. `DisallowedFunctionRule` - Disallow the use of certain functions like `string_of_int`
+2. `DisallowedOperatorRule` - Disallow the use of certain operators like `|>`
+3. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
 
 ### Writing your own rule
 
@@ -134,7 +142,12 @@ The linter currently doesn't handle all cases, for now it only handles `expressi
 We define GADT `modifier` type that you need to specify as the `proxy` field based on `Rule.HASRULE` signature above.
 
 ```ocaml
-type _ modifier = MExpression : Parsetree.expression modifier | MStructure : Parsetree.structure modifier
+type _ modifier =
+  | MExpression : Parsetree.expression modifier
+  | MStructure : Parsetree.structure modifier
+  | MPattern : Parsetree.pattern modifier
 ```
 
 If you like to parse an expression, then you'd need to choose `MExpression`, same goes with `MStructure`. Which one you'd pick is mostly based on which part you'd like to lint. Playing with print the AST above will help. Most of the time `expression` can take care most of your lint requirement.
+
+`MPattern` allows you parse variable names etc (You could potentialy use `MStructure` to do the same).
