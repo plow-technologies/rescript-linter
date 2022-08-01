@@ -32,14 +32,6 @@ module DisallowTriangleOperatorRule = DisallowedOperatorRule.Make (struct
     ; DisallowedOperatorRule.Options.suggested_operator= Some "->" }
 end)
 
-let rules =
-  [ (module DisallowStringOfIntRule : Rule.HASRULE)
-  ; (module DisallowIntOfStringOptRule : Rule.HASRULE)
-  ; (module DisallowFloatOfStringOptRule : Rule.HASRULE)
-  ; (module DisallowTriangleOperatorRule : Rule.HASRULE)
-  ; (module NoJStringInterpolation.Rule : Rule.HASRULE)
-  ; (module JSXRule.Rule : Rule.HASRULE) ]
-
 let processFile path =
   let channel = open_in_bin path in
   let src = really_input_string channel (in_channel_length channel) in
@@ -52,21 +44,22 @@ let lint rules structure =
   iterator.structure iterator structure ;
   !errors
 
-let run path =
+let run configPath path =
+  let rules = ConfigReader.parseConfig configPath in
   let src = processFile path in
   (* if you want to target the printer use: let mode = Res_parser.Default in*)
   let p = Res_parser.make ~mode:Res_parser.Default src path in
   let structure = Res_core.parseImplementation p in
   match p.diagnostics with
-  | [] -> (
-      let errors = lint rules structure in
-      match errors with
-      | [] -> print_endline "All good"
-      | xs ->
-          let f (msg, loc) = Printer.printError src msg loc in
-          List.iter f xs );
-          exit 1
+  | [] ->
+      (let errors = lint rules structure in
+       match errors with
+       | [] -> print_endline "All good"
+       | xs ->
+           let f (msg, loc) = Printer.printError src msg loc in
+           List.iter f xs ) ;
+      exit 1
   | diagnostics ->
       (* parser contains problems *)
-      Res_diagnostics.printReport diagnostics src;
+      Res_diagnostics.printReport diagnostics src ;
       exit 1
