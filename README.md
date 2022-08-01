@@ -27,10 +27,49 @@ dune runtest
 
 ## Running the parser
 
+### Config file
+
+You can set rules that you want to lint using config file. See below for list of available rules.
+
+```json
+{
+  "rules": [
+    {
+      "rule": "DisallowOperator",
+      "options": {
+        "disallowed_operator": "|>",
+        "suggested_operator": "->"
+      }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_operator": "string_of_int",
+        "suggested_operator": "Belt.Int.fromString"
+      }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_operator": "intOfStringOpt",
+        "suggested_operator": "Belt.Int.fromString"
+      }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_operator": "floatOfStringOpt",
+        "suggested_operator": "Belt.Float.fromString"
+      }
+    }
+  ]
+}
+```
+
 Once you build the project, you can copy the resulting binary. Or you can also run it with `dune`
 
 ```
-dune exec -- rescript_linter foo.res
+dune exec -- rescript_linter -c config.json foo.res
 ```
 
 ## Rules
