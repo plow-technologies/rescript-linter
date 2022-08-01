@@ -44,23 +44,26 @@ You can set rules that you want to lint using config file. See below for list of
     {
       "rule": "DisallowFunction",
       "options": {
-        "disallowed_operator": "string_of_int",
-        "suggested_operator": "Belt.Int.fromString"
+        "disallowed_function": "string_of_int",
+        "suggested_function": "Belt.Int.fromString"
       }
     },
     {
       "rule": "DisallowFunction",
       "options": {
-        "disallowed_operator": "intOfStringOpt",
-        "suggested_operator": "Belt.Int.fromString"
+        "disallowed_function": "intOfStringOpt",
+        "suggested_function": "Belt.Int.fromString"
       }
     },
     {
       "rule": "DisallowFunction",
       "options": {
-        "disallowed_operator": "floatOfStringOpt",
-        "suggested_operator": "Belt.Float.fromString"
+        "disallowed_function": "floatOfStringOpt",
+        "suggested_function": "Belt.Float.fromString"
       }
+    },
+    {
+      "rule": "NoJStringInterpolation"
     }
   ]
 }
@@ -80,8 +83,8 @@ Rules are defined in `lib/rules`.
 
 Currently, there are three rules available
 
-1. `DisallowedFunctionRule` - Disallow the use of certain functions like `string_of_int`
-2. `DisallowedOperatorRule` - Disallow the use of certain operators like `|>`
+1. `DisallowFunction` - Disallow the use of certain functions like `string_of_int`
+2. `DisallowOperator` - Disallow the use of certain operators like `|>`
 3. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
 
 ### Writing your own rule
@@ -146,6 +149,10 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
     ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 ```
+
+#### Rule configuration parser
+
+You can add the parser that parses JSON config in `ConfigReader.ml`. That way the config will read the correct rules that you defined.
 
 ### Understanding the AST
 
