@@ -1,37 +1,5 @@
 open Rescript_parser
 
-module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
-  type options = DisallowedFunctionRule.Options.options
-
-  let options =
-    { DisallowedFunctionRule.Options.disallowed_function= "string_of_int"
-    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
-end)
-
-module DisallowIntOfStringOptRule = DisallowedFunctionRule.Make (struct
-  type options = DisallowedFunctionRule.Options.options
-
-  let options =
-    { DisallowedFunctionRule.Options.disallowed_function= "intOfStringOpt"
-    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
-end)
-
-module DisallowFloatOfStringOptRule = DisallowedFunctionRule.Make (struct
-  type options = DisallowedFunctionRule.Options.options
-
-  let options =
-    { DisallowedFunctionRule.Options.disallowed_function= "floatOfStringOpt"
-    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Float.fromString" }
-end)
-
-module DisallowTriangleOperatorRule = DisallowedOperatorRule.Make (struct
-  type options = DisallowedOperatorRule.Options.options
-
-  let options =
-    { DisallowedOperatorRule.Options.disallowed_operator= "|>"
-    ; DisallowedOperatorRule.Options.suggested_operator= Some "->" }
-end)
-
 let processFile path =
   let channel = open_in_bin path in
   let src = really_input_string channel (in_channel_length channel) in

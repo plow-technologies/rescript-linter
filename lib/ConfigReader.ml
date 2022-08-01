@@ -28,6 +28,8 @@ let createDisallowFunctionRule options =
   end) in
   (module M : Rule.HASRULE)
 
+let createNoJStringInterpolationRule () = (module NoJStringInterpolation.Rule : Rule.HASRULE)
+
 let parseConfig path =
   let json = Yojson.Basic.from_file path in
   let open Yojson.Basic.Util in
@@ -40,6 +42,7 @@ let parseConfig path =
     | "DisallowFunction" ->
         let options = json |> member "options" in
         createDisallowFunctionRule options
+    | "NoJStringInterpolation" -> createNoJStringInterpolationRule ()
     | _ -> raise RuleDoesNotExist
   in
   json |> member "rules" |> to_list |> List.map filter_rule
