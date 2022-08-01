@@ -6,6 +6,27 @@
           "disallowed_operator": "|>",
           "suggested_operator": "->"
         }
+      },
+      {
+        "rule": "DisallowFunction",
+        "options": {
+          "disallowed_operator": "string_of_int",
+          "suggested_operator": "Belt.Int.fromString"
+        }
+      },
+      {
+        "rule": "DisallowFunction",
+        "options": {
+          "disallowed_operator": "intOfStringOpt",
+          "suggested_operator": "Belt.Int.fromString"
+        }
+      },
+      {
+        "rule": "DisallowFunction",
+        "options": {
+          "disallowed_operator": "floatOfStringOpt",
+          "suggested_operator": "Belt.Float.fromString"
+        }
       }
     ]
   }
