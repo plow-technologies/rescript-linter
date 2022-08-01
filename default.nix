@@ -1,27 +1,11 @@
-{}:
+with import <nixpkgs> {};
 let
-  pkgs = (import <nixpkgs> {});
-in (pkgs.stdenv.mkDerivation rec {
-  dune = pkgs.callPackage ./dune.nix {
-    lib = pkgs.lib;
-    findlib = pkgs.ocamlPackages.findlib;
-  };
-
-  name = "rescript_linter";
-  pname = name;
-
-  src = pkgs.lib.cleanSourceWith {
-    name = "rescript_linter";
+  ocaml = ocamlPackages.ocaml;
+  opam2nix = import ./nix/opam2nix.nix {};
+  selection = opam2nix.build {
+    inherit ocaml;
+    selection = ./nix/opam-selection.nix;
     src = ./.;
   };
-
-  buildInputs = with pkgs; [ ocaml dune ];
-
-  buildPhase = ''
-    dune build -p rescript_linter
-  '';
-
-  installPhase = ''
-    cp _build/install/default/bin/rescript_linter $out
-  '';
-})
+in
+selection.rescript_linter
