@@ -19,14 +19,14 @@ let run configPath path =
   let p = Res_parser.make ~mode:Res_parser.Default src path in
   let structure = Res_core.parseImplementation p in
   match p.diagnostics with
-  | [] ->
-      (let errors = lint rules structure in
-       match errors with
-       | [] -> print_endline "All good"
-       | xs ->
-           let f (msg, loc) = Printer.printError src msg loc in
+  | [] -> (
+      let errors = lint rules structure in
+      match errors with
+      | [] -> print_endline "All good" ; exit 0
+      | xs ->
+          (let f (msg, loc) = Printer.printError src msg loc in
            List.iter f xs ) ;
-      exit 1
+          exit 1 )
   | diagnostics ->
       (* parser contains problems *)
       Res_diagnostics.printReport diagnostics src ;

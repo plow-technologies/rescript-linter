@@ -1,32 +1,35 @@
-  {
-    "rules": [
-      {
-        "rule": "DisallowOperator",
-        "options": {
-          "disallowed_operator": "|>",
-          "suggested_operator": "->"
-        }
-      },
-      {
-        "rule": "DisallowFunction",
-        "options": {
-          "disallowed_operator": "string_of_int",
-          "suggested_operator": "Belt.Int.fromString"
-        }
-      },
-      {
-        "rule": "DisallowFunction",
-        "options": {
-          "disallowed_operator": "intOfStringOpt",
-          "suggested_operator": "Belt.Int.fromString"
-        }
-      },
-      {
-        "rule": "DisallowFunction",
-        "options": {
-          "disallowed_operator": "floatOfStringOpt",
-          "suggested_operator": "Belt.Float.fromString"
-        }
+{
+  "rules": [
+    {
+      "rule": "DisallowOperator",
+      "options": {
+        "disallowed_operator": "|>",
+        "suggested_operator": "->"
       }
-    ]
-  }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_function": "string_of_int",
+        "suggested_function": "Belt.Int.fromString"
+      }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_function": "intOfStringOpt",
+        "suggested_function": "Belt.Int.fromString"
+      }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_function": "floatOfStringOpt",
+        "suggested_function": "Belt.Float.fromString"
+      }
+    },
+    {
+      "rule": "NoJStringInterpolation"
+    }
+  ]
+}
