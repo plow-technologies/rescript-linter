@@ -8,14 +8,15 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) :
   Rule.HASRULE with type t = Parsetree.expression = struct
   let description =
     match OPT.options.suggested_operator with
-    | Some op -> "[Rescript] Do not use " ^ OPT.options.disallowed_operator ^ ", please use " ^ op ^ " instead."
+    | Some op ->
+        "[Rescript] Do not use " ^ OPT.options.disallowed_operator ^ ", please use " ^ op ^ " instead."
     | None -> "[Rescript] Do not use " ^ OPT.options.disallowed_operator
 
   type t = Parsetree.expression
 
   let proxy = Rule.MExpression
 
-  let meta = {Rule.ruleName= "Disallowed Operator"; Rule.ruleDescription= description}
+  let meta = {Rule.ruleName= "DisallowOperator"; Rule.ruleDescription= description}
 
   let op = OPT.options.Options.disallowed_operator
 
