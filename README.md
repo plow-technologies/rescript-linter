@@ -75,6 +75,17 @@ Once you build the project, you can copy the resulting binary. Or you can also r
 dune exec -- rescript_linter -c config.json foo.res
 ```
 
+### Disabling lint
+
+You can disable lint per file. Simply add `RSLINT_DISABLE` comment at the top of your file.
+
+```rescript
+// RSLINT_DISABLE
+
+// this will not throw lint error
+let _ = string_of_int(1)
+```
+
 ## Rules
 
 Rules are built-in in the project. Currently there's no pluggable architecture to add third party rule.
