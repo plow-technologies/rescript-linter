@@ -8,7 +8,7 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) :
   Rule.HASRULE with type t = Parsetree.expression = struct
   let description =
     match OPT.options.suggested_function with
-    | Some func_name -> "[Rescript] Do not use " ^ OPT.options.disallowed_function ^ ", use " ^ func_name
+    | Some func_name -> "[Rescript] Do not use " ^ OPT.options.disallowed_function ^ ", please use " ^ func_name ^ " instead."
     | None -> "[Rescript] Do not use " ^ OPT.options.disallowed_function
 
   type t = Parsetree.expression
