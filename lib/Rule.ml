@@ -24,10 +24,3 @@ module type OPTIONS = sig
 
   val options : options
 end
-
-(* module type HasRule2 = sig type t val lint : t -> lintResult end
-
-   module type ISRULE = sig type t val proxy : t modifier val lint : t -> lintResult end
-
-   module MakeRule2 : ISRULE = struct type t = Parsetree.expression let proxy = MExpression let lint _expr =
-   LintOk end *)
