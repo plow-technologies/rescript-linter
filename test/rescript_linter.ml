@@ -119,6 +119,20 @@ module Tests = struct
     | [_; _] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
 
+  let disabled_multiple_lints_test () =
+    let parseResult = parseAst "testData/disabled_multiple_rules_test.res" in
+    let errors =
+      Linter.lint
+        [ (module DisallowStringOfIntRule : Rule.HASRULE)
+        ; (module DisallowInOfStringOptRule : Rule.HASRULE)
+        ; (module DisallowTriangleOperatorRule : Rule.HASRULE) ]
+        parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [(msg, _)] ->
+        Alcotest.(check string) "Same error message" msg DisallowTriangleOperatorRule.meta.ruleDescription
+    | _ -> Alcotest.fail "Should only have two lint error"
+
   let no_react_component_test_1 () =
     let parseResult = parseAst "testData/no_react_component_test_1.res" in
     let errors =
@@ -151,7 +165,8 @@ let () =
     ; ( "Disable lint test"
       , [ test_case "Disable lint" `Quick Tests.disable_lint_test
         ; test_case "Disable lint per rule" `Quick Tests.disable_lint_per_rule_test
-        ; test_case "Disable lint per specific" `Quick Tests.disable_lint_per_rule_specific_test ] )
+        ; test_case "Disable lint per specific" `Quick Tests.disable_lint_per_rule_specific_test
+        ; test_case "Disable multiple lints" `Quick Tests.disabled_multiple_lints_test ] )
     ; ( "No react component"
       , [ test_case "No input box" `Quick Tests.no_react_component_test_1
         ; test_case "No Inner component" `Quick Tests.no_react_component_test_2 ] ) ]
