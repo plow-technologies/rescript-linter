@@ -64,6 +64,12 @@ You can set rules that you want to lint using config file. See below for list of
     },
     {
       "rule": "NoJStringInterpolation"
+    },
+    {
+      "rule": "NoReactComponent",
+      "options": {
+        "component": "input"
+      }
     }
   ]
 }
@@ -108,7 +114,7 @@ let _ = intOfStringOpt("1")
 
 This style of disabling rules depend on how each rule is implemented. For example, `NoJStringInterpolation` does not have this feature because the rule itself is generic.
 
-However, you can do the same for `DisallowOperator` rule.
+However, you can do the same for `DisallowOperator` and `NoReactComponent` rule.
 
 ## Rules
 
@@ -116,11 +122,12 @@ Rules are built-in in the project. Currently there's no pluggable architecture t
 
 Rules are defined in `lib/rules`.
 
-Currently, there are three rules available
+Currently, there are four rules available
 
 1. `DisallowFunction` - Disallow the use of certain functions like `string_of_int`
 2. `DisallowOperator` - Disallow the use of certain operators like `|>`
 3. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
+4. `NoReactComponent` - Disallow use of certain React component/dom.
 
 ### Writing your own rule
 

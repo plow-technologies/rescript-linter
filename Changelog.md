@@ -1,3 +1,7 @@
+### 2022-08-02 - v0.1.0
+* Better support for disabling lint
+* New rule: NoReactComponent
+
 ### 2022-08-02 - v0.0.3
 * Disable lint with comment
 
