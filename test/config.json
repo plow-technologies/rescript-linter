@@ -34,7 +34,13 @@
     {
       "rule": "NoReactComponent",
       "options": {
-        "component": "input"
+        "component": "input2"
+      }
+    },
+    {
+      "rule": "NoReactComponent",
+      "options": {
+        "component": "Inner"
       }
     }
   ]

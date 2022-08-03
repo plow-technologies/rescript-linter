@@ -19,7 +19,17 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) :
 
   let lint expr =
     match expr with
+    (* Parses React dom like <input /> *)
     | { Parsetree.pexp_desc= Pexp_apply ({pexp_desc= Pexp_ident {txt= Longident.Lident ident}}, _)
+      ; Parsetree.pexp_attributes= [({Asttypes.txt= "JSX"}, _)]
+      ; Parsetree.pexp_loc= loc }
+      when ident = component_name ->
+        print_endline ident ;
+        Rule.LintError (meta.ruleDescription, loc)
+    (* Parser React component like <Component /> *)
+    | { Parsetree.pexp_desc=
+          Pexp_apply
+            ({pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, "createElement")}}, _)
       ; Parsetree.pexp_attributes= [({Asttypes.txt= "JSX"}, _)]
       ; Parsetree.pexp_loc= loc }
       when ident = component_name ->
