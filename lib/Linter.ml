@@ -1,11 +1,13 @@
 open Rescript_parser
 
-let hasDisableLintComment comments =
+let findTextInComments comments needle =
   let f (comment : Res_comment.t) =
     let txt = Res_comment.txt comment in
-    String.trim txt = "RSLINT_DISABLE"
+    String.trim txt = needle
   in
   List.exists f comments
+
+let hasDisableLintComment comments = findTextInComments comments "RSLINT_DISABLE"
 
 let processFile path =
   let channel = open_in_bin path in
@@ -16,6 +18,13 @@ let lint rules structure comments =
   let errors = ref [] in
   if hasDisableLintComment comments then !errors
   else
+    let f acc rule =
+      let module R = (val rule : Rule.HASRULE) in
+      let name = "RSLINT_DISABLE_" ^ R.meta.ruleName in
+      let identifier = "RSLINT_DISABLE_" ^ R.meta.ruleIdentifier in
+      if findTextInComments comments name || findTextInComments comments identifier then acc else acc @ [rule]
+    in
+    let rules = List.fold_left f [] rules in
     let callback (pair : string * Location.t) = errors := !errors @ [pair] in
     let iterator = Iterator.makeIterator rules callback in
     iterator.structure iterator structure ;

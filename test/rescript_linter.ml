@@ -9,6 +9,14 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
     ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 
+module DisallowInOfStringOptRule = DisallowedFunctionRule.Make (struct
+  type options = DisallowedFunctionRule.Options.options
+
+  let options =
+    { DisallowedFunctionRule.Options.disallowed_function= "intOfStringOpt"
+    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
+end)
+
 module DisallowTriangleOperatorRule = DisallowedOperatorRule.Make (struct
   type options = DisallowedOperatorRule.Options.options
 
@@ -29,7 +37,9 @@ module Tests = struct
   (* The tests *)
   let disallow_test_1 () =
     let parseResult = parseAst "testData/disallowed_function_rule_test_1.res" in
-    let errors = Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors =
+      Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [(msg, _); _] ->
         Alcotest.(check string) "Same error message" DisallowStringOfIntRule.meta.ruleDescription msg
@@ -37,14 +47,18 @@ module Tests = struct
 
   let disallow_test_2 () =
     let parseResult = parseAst "testData/disallowed_function_rule_test_2.res" in
-    let errors = Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors =
+      Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should not have any lint errors"
 
   let disallow_operator_test () =
     let parseResult = parseAst "testData/disallowed_operator_rule_test.res" in
-    let errors = Linter.lint [(module DisallowTriangleOperatorRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors =
+      Linter.lint [(module DisallowTriangleOperatorRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [(msg, _)] ->
         Alcotest.(check string) "Same error message" DisallowTriangleOperatorRule.meta.ruleDescription msg
@@ -52,18 +66,46 @@ module Tests = struct
 
   let no_jstring_interpolation_test () =
     let parseResult = parseAst "testData/no_jstring_interpolation_test.res" in
-    let errors = Linter.lint [(module NoJStringInterpolation.Rule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors =
+      Linter.lint [(module NoJStringInterpolation.Rule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [(msg, _)] ->
         Alcotest.(check pass) "Same error message" NoJStringInterpolation.Rule.meta.ruleDescription msg
     | _ -> Alcotest.fail "Should only return one error"
 
   let disable_lint_test () =
-    let parseResult = parseAst "testData/disabled_lint_test.res" in
-    let errors = Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let parseResult = parseAst "testData/disabled_lint_test_1.res" in
+    let errors =
+      Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [] -> Alcotest.(check pass) "Same error message" [] []
-    | _ -> Alcotest.fail "Should only have two lint errors"
+    | _ -> Alcotest.fail "Should only no lint errors"
+
+  let disable_lint_per_rule_test () =
+    let parseResult = parseAst "testData/disabled_lint_test_2.res" in
+    let errors =
+      Linter.lint
+        [(module DisallowStringOfIntRule : Rule.HASRULE); (module DisallowTriangleOperatorRule : Rule.HASRULE)]
+        parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have one lint error"
+
+  let disable_lint_per_rule_specific_test () =
+    let parseResult = parseAst "testData/disabled_lint_test_3.res" in
+    let errors =
+      Linter.lint
+        [ (module DisallowStringOfIntRule : Rule.HASRULE)
+        ; (module DisallowInOfStringOptRule : Rule.HASRULE)
+        ; (module DisallowTriangleOperatorRule : Rule.HASRULE) ]
+        parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_; _] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have two lint error"
 end
 
 (* Run it *)
@@ -76,4 +118,7 @@ let () =
     ; ( "No J String Interpolation Rule"
       , [test_case "Lint j`` string" `Quick Tests.no_jstring_interpolation_test] )
     ; ("Disallow |> operator", [test_case "Lint |> operator" `Quick Tests.disallow_operator_test])
-    ; ("Disable lint test", [test_case "Disable lint" `Quick Tests.disable_lint_test]) ]
+    ; ( "Disable lint test"
+      , [ test_case "Disable lint" `Quick Tests.disable_lint_test
+        ; test_case "Disable lint per rule" `Quick Tests.disable_lint_per_rule_test
+        ; test_case "Disable lint per specific" `Quick Tests.disable_lint_per_rule_specific_test ] ) ]

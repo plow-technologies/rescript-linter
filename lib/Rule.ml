@@ -7,7 +7,7 @@ type _ modifier =
 
 type lintResult = LintError of string * Location.t | LintOk
 
-type meta = {ruleName: string; ruleDescription: string}
+type meta = {ruleIdentifier: string; ruleName: string; ruleDescription: string}
 
 module type HASRULE = sig
   type t
