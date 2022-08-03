@@ -16,9 +16,12 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) :
 
   let proxy = Rule.MExpression
 
-  let meta = {Rule.ruleName= "DisallowFunction"; Rule.ruleDescription= description}
-
   let function_name = OPT.options.Options.disallowed_function
+
+  let meta =
+    { Rule.ruleName= "DisallowFunction"
+    ; Rule.ruleIdentifier= "DisallowFunction" ^ "[" ^ function_name ^ "]"
+    ; Rule.ruleDescription= description }
 
   let lint expr =
     match expr with

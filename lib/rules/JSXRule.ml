@@ -5,7 +5,10 @@ module Rule : Rule.HASRULE with type t = Parsetree.expression = struct
 
   let proxy = Rule.MExpression
 
-  let meta = {Rule.ruleName= "NoReactComponent"; Rule.ruleDescription= "Don't use input type"}
+  let meta =
+    { Rule.ruleName= "NoReactComponent"
+    ; Rule.ruleIdentifier= "NoReactComponent"
+    ; Rule.ruleDescription= "Don't use input type" }
 
   let lint expr =
     match expr with

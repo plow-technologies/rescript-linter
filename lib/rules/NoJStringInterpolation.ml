@@ -7,6 +7,7 @@ module Rule : Rule.HASRULE with type t = Parsetree.expression = struct
 
   let meta =
     { Rule.ruleName= "NoJStringInterpolation"
+    ; Rule.ruleIdentifier= "NoJStringInterpolation"
     ; Rule.ruleDescription=
         "[Rescript] Do not use j`<string>` interpolation, use `` instead and explicitly convert args to \
          string." }

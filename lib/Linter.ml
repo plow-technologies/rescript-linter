@@ -21,7 +21,8 @@ let lint rules structure comments =
     let f acc rule =
       let module R = (val rule : Rule.HASRULE) in
       let name = "RSLINT_DISABLE_" ^ R.meta.ruleName in
-      if findTextInComments comments name then acc else acc @ [rule]
+      let identifier = "RSLINT_DISABLE_" ^ R.meta.ruleIdentifier in
+      if findTextInComments comments name || findTextInComments comments identifier then acc else acc @ [rule]
     in
     let rules = List.fold_left f [] rules in
     let callback (pair : string * Location.t) = errors := !errors @ [pair] in

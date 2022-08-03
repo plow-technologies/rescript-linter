@@ -9,6 +9,14 @@ module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
     ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
 end)
 
+module DisallowInOfStringOptRule = DisallowedFunctionRule.Make (struct
+  type options = DisallowedFunctionRule.Options.options
+
+  let options =
+    { DisallowedFunctionRule.Options.disallowed_function= "intOfStringOpt"
+    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
+end)
+
 module DisallowTriangleOperatorRule = DisallowedOperatorRule.Make (struct
   type options = DisallowedOperatorRule.Options.options
 
@@ -85,6 +93,19 @@ module Tests = struct
     match errors with
     | [_] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have one lint error"
+
+  let disable_lint_per_rule_specific_test () =
+    let parseResult = parseAst "testData/disabled_lint_test_3.res" in
+    let errors =
+      Linter.lint
+        [ (module DisallowStringOfIntRule : Rule.HASRULE)
+        ; (module DisallowInOfStringOptRule : Rule.HASRULE)
+        ; (module DisallowTriangleOperatorRule : Rule.HASRULE) ]
+        parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_; _] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have two lint error"
 end
 
 (* Run it *)
@@ -99,4 +120,5 @@ let () =
     ; ("Disallow |> operator", [test_case "Lint |> operator" `Quick Tests.disallow_operator_test])
     ; ( "Disable lint test"
       , [ test_case "Disable lint" `Quick Tests.disable_lint_test
-        ; test_case "Disable lint per rule" `Quick Tests.disable_lint_per_rule_test ] ) ]
+        ; test_case "Disable lint per rule" `Quick Tests.disable_lint_per_rule_test
+        ; test_case "Disable lint per specific" `Quick Tests.disable_lint_per_rule_specific_test ] ) ]
