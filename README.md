@@ -112,7 +112,18 @@ let _ = string_of_int(0)
 let _ = intOfStringOpt("1")
 ```
 
-This style of disabling rules depend on how each rule is implemented. For example, `NoJStringInterpolation` does not have this feature because the rule itself is generic.
+You can also disable multiple rules
+
+```rescript
+// RSLINT_DISABLE_DisallowFunction[string_of_int]
+// RSLINT_DISABLE_DisallowFunction[intOfStringOpt]
+
+// this will not throw lint errors
+let _ = string_of_int(0)
+let _ = intOfStringOpt("1")
+```
+
+This style of disabling rules depends on how each rule is implemented. For example, `NoJStringInterpolation` does not have this feature because the rule itself is generic.
 
 However, you can do the same for `DisallowOperator` and `NoReactComponent` rule.
 

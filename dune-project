@@ -2,7 +2,7 @@
 
 (name rescript_linter)
 
-(version 0.0.3)
+(version 0.1.0)
 
 (generate_opam_files true)
 
