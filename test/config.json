@@ -42,6 +42,13 @@
       "options": {
         "component": "Inner"
       }
+    },
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_module": "Css",
+        "suggested_module": "CssJs"
+      }
     }
   ]
 }

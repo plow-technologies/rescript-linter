@@ -28,7 +28,7 @@ let createDisallowFunctionRule options =
   end) in
   (module M : Rule.HASRULE)
 
-let createNoJStringInterpolationRule () = (module NoJStringInterpolation.Rule : Rule.HASRULE)
+let createNoJStringInterpolationRule () = (module NoJStringInterpolationRule: Rule.HASRULE)
 
 let createNoReactComponentRule options =
   let open Yojson.Basic.Util in
@@ -37,6 +37,19 @@ let createNoReactComponentRule options =
     type options = NoReactComponentRule.Options.options
 
     let options = {NoReactComponentRule.Options.component_name}
+  end) in
+  (module M : Rule.HASRULE)
+
+let createDisallowModuleRule options =
+  let open Yojson.Basic.Util in
+  let disallowed_module = options |> member "disallowed_module" |> to_string in
+  let suggested_module = options |> member "suggested_module" |> to_string in
+  let module M = DisallowModuleRule.Make (struct
+    type options = DisallowModuleRule.Options.options
+
+    let options =
+      { DisallowModuleRule.Options.disallowed_module
+      ; DisallowModuleRule.Options.suggested_module= Some suggested_module }
   end) in
   (module M : Rule.HASRULE)
 
@@ -56,6 +69,9 @@ let parseConfig path =
     | "NoReactComponent" ->
         let options = json |> member "options" in
         createNoReactComponentRule options
+    | "DisallowModule" ->
+        let options = json |> member "options" in
+        createDisallowModuleRule options
     | _ -> raise RuleDoesNotExist
   in
   json |> member "rules" |> to_list |> List.map filter_rule

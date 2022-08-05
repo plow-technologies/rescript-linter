@@ -13,3 +13,8 @@ let printError src msg d =
   formatMessage Format.std_formatter src
     Location.
       {loc= {loc_start= d.loc_start; loc_end= d.loc_end; loc_ghost= false}; msg; sub= []; if_highlight= ""}
+
+let printHelp () =
+   print_newline ();
+   print_newline ();
+   print_endline "  To disable linting for certain rules, please read https://github.com/plow-technologies/rescript-linter#disabling-lint";

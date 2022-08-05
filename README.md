@@ -49,26 +49,19 @@ You can set rules that you want to lint using config file. See below for list of
       }
     },
     {
-      "rule": "DisallowFunction",
-      "options": {
-        "disallowed_function": "intOfStringOpt",
-        "suggested_function": "Belt.Int.fromString"
-      }
-    },
-    {
-      "rule": "DisallowFunction",
-      "options": {
-        "disallowed_function": "floatOfStringOpt",
-        "suggested_function": "Belt.Float.fromString"
-      }
-    },
-    {
       "rule": "NoJStringInterpolation"
     },
     {
       "rule": "NoReactComponent",
       "options": {
         "component": "input"
+      }
+    },
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_module": "Css",
+        "suggested_module": "CssJs"
       }
     }
   ]
@@ -133,12 +126,13 @@ Rules are built-in in the project. Currently there's no pluggable architecture t
 
 Rules are defined in `lib/rules`.
 
-Currently, there are four rules available
+Currently, there are five rules available:
 
 1. `DisallowFunction` - Disallow the use of certain functions like `string_of_int`
 2. `DisallowOperator` - Disallow the use of certain operators like `|>`
 3. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
-4. `NoReactComponent` - Disallow use of certain React component/dom.
+4. `NoReactComponent` - Disallow use of certain React component/dom
+5. `DisallowModule` - Disallow use of certain module
 
 ### Writing your own rule
 
@@ -149,17 +143,22 @@ By convention, you should write a new rule on its own module in `lib/rules`.
 Each rule module must have the signature of `Rule.HASRULE`.
 
 ```ocaml
+type linter =
+  | LintExpression of (Parsetree.expression -> lintResult)
+  | LintStructure of (Parsetree.structure -> lintResult)
+  | LintStructureItem of (Parsetree.structure_item -> lintResult)
+  | LintPattern of (Parsetree.pattern -> lintResult)
+
 module type HASRULE = sig
-  type t
-  val proxy : t modifier
   val meta : meta
-  val lint : t -> lintResult
+  val linters : linter list
 end
 ```
 
 - `meta` allows you to define name and the rule description
-- `proxy` and `type t` should be based on the type of AST that you would like to capture
-- then you should write the `lint` function that receive the AST based on type `t` and this function should return either `LintOk` or `LintError`
+- `linters` are list of functions that receive AST and these functions should either return `LintOk` or `LintError`.
+  - it is a list of linters because sometimes it is convenience to be able to parse at different type of AST node.
+  - see `lib/rules/DisallowModuleRule.ml` for an example of this.
 
 #### Rule with options
 
@@ -240,17 +239,29 @@ $ rescript -print ast test.res
 
 The complete AST types can be found in [https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli](https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli)
 
-The linter currently doesn't handle all cases, for now it only handles `expression` and `structure` AST.
+The linter currently doesn't handle all cases, it only handle few cases. See `lib/Rule.ml`.
 
-We define GADT `modifier` type that you need to specify as the `proxy` field based on `Rule.HASRULE` signature above.
+We define a type linter that takes a function of relevant AST type.
 
 ```ocaml
-type _ modifier =
-  | MExpression : Parsetree.expression modifier
-  | MStructure : Parsetree.structure modifier
-  | MPattern : Parsetree.pattern modifier
+type linter =
+  | LintExpression of (Parsetree.expression -> lintResult)
+  | LintStructure of (Parsetree.structure -> lintResult)
+  | LintStructureItem of (Parsetree.structure_item -> lintResult)
+  | LintPattern of (Parsetree.pattern -> lintResult)
 ```
 
-If you like to parse an expression, then you'd need to choose `MExpression`, same goes with `MStructure`. Which one you'd pick is mostly based on which part you'd like to lint. Playing with print the AST above will help. Most of the time `expression` can take care most of your lint requirement.
+At the top of the AST, generally you'd have `Parsetree.structure_item`. With `Parsetree.structure_item` you can parse basically anything but it can be tedious to drill down to the type of AST you're interested in.
+This is useful to parse anything at the module level like for example checking module usage, making lint rule such as no `open module` etc. Note that `Parsetree.structure` is just a list of `Parsetree.structure_item`.
 
-`MPattern` allows you parse variable names etc (You could potentialy use `MStructure` to do the same).
+For convenience, we exposed `Parsetree.expression` and `Parsetree.pattern`. The former allows you to parse any expression and the latter allows you to parse variables.
+
+In most cases, `Parsetree.expression` is enough to handle all your needs. Printing the AST for the code you're interested in linting is a good step to understand which AST node type that will help.
+
+#### Walking the AST
+
+Walking throught the AST is done through iterator [https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/ast_iterator.mli](https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/ast_iterator.mli).
+
+It allows you to define methods that will be called whenever each of these AST types are traversed.
+
+The default iterator doesn't do anything. Our linter extends this iterator to include the AST that we are interested in (defined by the rules) and attach a callback function that accumulates any lint errors. See `lib/Iterator.ml`

@@ -45,6 +45,7 @@ let run configPath path =
       | xs ->
           (let f (msg, loc) = Printer.printError src msg loc in
            List.iter f xs ) ;
+           Printer.printHelp ();
           exit 1 )
   | diagnostics ->
       (* parser contains problems *)

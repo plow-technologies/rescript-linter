@@ -37,6 +37,14 @@ module NoInnerComponentRule = NoReactComponentRule.Make (struct
   let options = {NoReactComponentRule.Options.component_name= "Inner"}
 end)
 
+module NoCSSModuleRule = DisallowModuleRule.Make (struct
+  type options = DisallowModuleRule.Options.options
+
+  let options =
+    { DisallowModuleRule.Options.disallowed_module= "Css"
+    ; DisallowModuleRule.Options.suggested_module= Some "CssJS" }
+end)
+
 type parseResult = {ast: Parsetree.structure; comments: Res_comment.t list}
 
 let parseAst path =
@@ -79,11 +87,11 @@ module Tests = struct
   let no_jstring_interpolation_test () =
     let parseResult = parseAst "testData/no_jstring_interpolation_test.res" in
     let errors =
-      Linter.lint [(module NoJStringInterpolation.Rule : Rule.HASRULE)] parseResult.ast parseResult.comments
+      Linter.lint [(module NoJStringInterpolationRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
     | [(msg, _)] ->
-        Alcotest.(check pass) "Same error message" NoJStringInterpolation.Rule.meta.ruleDescription msg
+        Alcotest.(check pass) "Same error message" NoJStringInterpolationRule.meta.ruleDescription msg
     | _ -> Alcotest.fail "Should only return one error"
 
   let disable_lint_test () =
@@ -150,6 +158,27 @@ module Tests = struct
     match errors with
     | [_] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
+
+  let disallow_module_test_1 () =
+    let parseResult = parseAst "testData/disallow_module_test_1.res" in
+    let errors = Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    match errors with
+    | [_; _] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have two lint error"
+
+  let disallow_module_test_2 () =
+    let parseResult = parseAst "testData/disallow_module_test_2.res" in
+    let errors = Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    match errors with
+    | [_; _] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have two lint error"
+
+  let disallow_module_test_3 () =
+    let parseResult = parseAst "testData/disallow_module_test_3.res" in
+    let errors = Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    match errors with
+    | [_; _] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have two lint error"
 end
 
 (* Run it *)
@@ -169,4 +198,8 @@ let () =
         ; test_case "Disable multiple lints" `Quick Tests.disabled_multiple_lints_test ] )
     ; ( "No react component"
       , [ test_case "No input box" `Quick Tests.no_react_component_test_1
-        ; test_case "No Inner component" `Quick Tests.no_react_component_test_2 ] ) ]
+        ; test_case "No Inner component" `Quick Tests.no_react_component_test_2 ] )
+    ; ( "Disallow module"
+      , [ test_case "open module" `Quick Tests.disallow_module_test_1
+        ; test_case "alias module" `Quick Tests.disallow_module_test_2
+        ; test_case "direct access module" `Quick Tests.disallow_module_test_3 ] ) ]

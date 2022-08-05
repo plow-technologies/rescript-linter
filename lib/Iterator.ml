@@ -16,6 +16,14 @@ let withStructure iterator f callback =
         (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
         iterator.Ast_iterator.structure iterator1 structure ) }
 
+let withStructureItem iterator f callback =
+  { iterator with
+    Ast_iterator.structure_item=
+      (fun iterator1 structure ->
+        let res = f structure in
+        (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
+        iterator.Ast_iterator.structure_item iterator1 structure ) }
+
 let withExpression iterator f callback =
   { iterator with
     Ast_iterator.expr=
@@ -27,9 +35,13 @@ let withExpression iterator f callback =
 let makeIterator rules callback =
   let f iterator rule =
     let module R = (val rule : Rule.HASRULE) in
-    match R.proxy with
-    | Rule.MExpression -> withExpression iterator R.lint callback
-    | Rule.MStructure -> withStructure iterator R.lint callback
-    | Rule.MPattern -> withPattern iterator R.lint callback
+    let buildIterator iterator lint =
+      match lint with
+      | Rule.LintExpression lintFunc -> withExpression iterator lintFunc callback
+      | Rule.LintStructure lintFunc -> withStructure iterator lintFunc callback
+      | Rule.LintStructureItem lintFunc -> withStructureItem iterator lintFunc callback
+      | Rule.LintPattern lintFunc -> withPattern iterator lintFunc callback
+    in
+    List.fold_left buildIterator iterator R.linters
   in
   List.fold_left f Ast_iterator.default_iterator rules
