@@ -49,26 +49,19 @@ You can set rules that you want to lint using config file. See below for list of
       }
     },
     {
-      "rule": "DisallowFunction",
-      "options": {
-        "disallowed_function": "intOfStringOpt",
-        "suggested_function": "Belt.Int.fromString"
-      }
-    },
-    {
-      "rule": "DisallowFunction",
-      "options": {
-        "disallowed_function": "floatOfStringOpt",
-        "suggested_function": "Belt.Float.fromString"
-      }
-    },
-    {
       "rule": "NoJStringInterpolation"
     },
     {
       "rule": "NoReactComponent",
       "options": {
         "component": "input"
+      }
+    },
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_module": "Css",
+        "suggested_module": "CssJs"
       }
     }
   ]
@@ -133,12 +126,13 @@ Rules are built-in in the project. Currently there's no pluggable architecture t
 
 Rules are defined in `lib/rules`.
 
-Currently, there are four rules available
+Currently, there are five rules available:
 
 1. `DisallowFunction` - Disallow the use of certain functions like `string_of_int`
 2. `DisallowOperator` - Disallow the use of certain operators like `|>`
 3. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
-4. `NoReactComponent` - Disallow use of certain React component/dom.
+4. `NoReactComponent` - Disallow use of certain React component/dom
+5. `DisallowModule` - Disallow use of certain module
 
 ### Writing your own rule
 
@@ -157,13 +151,14 @@ type linter =
 
 module type HASRULE = sig
   val meta : meta
-  val lint : linter list
+  val linters : linter list
 end
 ```
 
 - `meta` allows you to define name and the rule description
--
-- then you should write the `lint` function that receive the AST based on type `t` and this function should return either `LintOk` or `LintError`
+- `linters` are list of functions that receive AST and these functions should either return `LintOk` or `LintError`.
+  - it is a list of linters because sometimes it is convenience to be able to parse at different type of AST node.
+  - see `lib/rules/DisallowModuleRule.ml` for an example of this.
 
 #### Rule with options
 
@@ -244,17 +239,18 @@ $ rescript -print ast test.res
 
 The complete AST types can be found in [https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli](https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli)
 
-The linter currently doesn't handle all cases, for now it only handles `expression` and `structure` AST.
+The linter currently doesn't handle all cases, it only handle few cases. See `lib/Rule.ml`.
 
-We define GADT `modifier` type that you need to specify as the `proxy` field based on `Rule.HASRULE` signature above.
+We define a type linter that takes a function of relevant AST type.
 
 ```ocaml
-type _ modifier =
-  | MExpression : Parsetree.expression modifier
-  | MStructure : Parsetree.structure modifier
-  | MPattern : Parsetree.pattern modifier
+type linter =
+  | LintExpression of (Parsetree.expression -> lintResult)
+  | LintStructure of (Parsetree.structure -> lintResult)
+  | LintStructureItem of (Parsetree.structure_item -> lintResult)
+  | LintPattern of (Parsetree.pattern -> lintResult)
 ```
 
-If you like to parse an expression, then you'd need to choose `MExpression`, same goes with `MStructure`. Which one you'd pick is mostly based on which part you'd like to lint. Playing with print the AST above will help. Most of the time `expression` can take care most of your lint requirement.
+If you like to parse an expression, then you'd need to choose `LintExpression`. Which one you'd pick is mostly based on which part of AST you'd like to lint. Playing with print the AST above will help. Most of the time `expression` can take care most of your lint requirement.
 
-`MPattern` allows you parse variable names etc (You could potentialy use `MStructure` to do the same).
+`LintPattern` allows you parse variable names, etc. At the root of the AST, you have `LintStructure` - it is useful if you like to parse at module level and below.
