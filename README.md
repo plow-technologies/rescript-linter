@@ -251,6 +251,17 @@ type linter =
   | LintPattern of (Parsetree.pattern -> lintResult)
 ```
 
-If you like to parse an expression, then you'd need to choose `LintExpression`. Which one you'd pick is mostly based on which part of AST you'd like to lint. Playing with print the AST above will help. Most of the time `expression` can take care most of your lint requirement.
+At the top of the AST, generally you'd have `Parsetree.structure_item`. With `Parsetree.structure_item` you can parse basically anything but it can be tedious to drill down to the type of AST you're interested in.
+This is useful to parse anything at the module level like for example checking module usage, making lint rule such as no `open module` etc. Note that `Parsetree.structure` is just a list of `Parsetree.structure_item`.
 
-`LintPattern` allows you parse variable names, etc. At the root of the AST, you have `LintStructure` - it is useful if you like to parse at module level and below.
+For convenience, we exposed `Parsetree.expression` and `Parsetree.pattern`. The former allows you to parse any expression and the latter allows you to parse variables.
+
+In most cases, `Parsetree.expression` is enough to handle all your needs. Printing the AST for the code you're interested in linting is a good step to understand which AST node type that will help.
+
+#### Walking the AST
+
+Walking throught the AST is done through iterator [https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/ast_iterator.mli](https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/ast_iterator.mli).
+
+It allows you to define methods that will be called whenever each of these AST types are traversed.
+
+The default iterator doesn't do anything. Our linter extends this iterator to include the AST that we are interested in (defined by the rules) and attach a callback function that accumulates any lint errors. See `lib/Iterator.ml`
