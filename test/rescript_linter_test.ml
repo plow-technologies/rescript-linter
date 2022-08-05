@@ -87,11 +87,11 @@ module Tests = struct
   let no_jstring_interpolation_test () =
     let parseResult = parseAst "testData/no_jstring_interpolation_test.res" in
     let errors =
-      Linter.lint [(module NoJStringInterpolation.Rule : Rule.HASRULE)] parseResult.ast parseResult.comments
+      Linter.lint [(module NoJStringInterpolationRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
     | [(msg, _)] ->
-        Alcotest.(check pass) "Same error message" NoJStringInterpolation.Rule.meta.ruleDescription msg
+        Alcotest.(check pass) "Same error message" NoJStringInterpolationRule.meta.ruleDescription msg
     | _ -> Alcotest.fail "Should only return one error"
 
   let disable_lint_test () =

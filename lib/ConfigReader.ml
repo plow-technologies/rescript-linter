@@ -28,7 +28,7 @@ let createDisallowFunctionRule options =
   end) in
   (module M : Rule.HASRULE)
 
-let createNoJStringInterpolationRule () = (module NoJStringInterpolation.Rule : Rule.HASRULE)
+let createNoJStringInterpolationRule () = (module NoJStringInterpolationRule: Rule.HASRULE)
 
 let createNoReactComponentRule options =
   let open Yojson.Basic.Util in

@@ -19,3 +19,5 @@ module Rule : Rule.HASRULE = struct
 
   let linters = [lintExpresion]
 end
+
+include Rule
