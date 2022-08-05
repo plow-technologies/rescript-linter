@@ -40,6 +40,19 @@ let createNoReactComponentRule options =
   end) in
   (module M : Rule.HASRULE)
 
+let createDisallowModuleRule options =
+  let open Yojson.Basic.Util in
+  let disallowed_module = options |> member "disallowed_module" |> to_string in
+  let suggested_module = options |> member "suggested_module" |> to_string in
+  let module M = DisallowModuleRule.Make (struct
+    type options = DisallowModuleRule.Options.options
+
+    let options =
+      { DisallowModuleRule.Options.disallowed_module
+      ; DisallowModuleRule.Options.suggested_module= Some suggested_module }
+  end) in
+  (module M : Rule.HASRULE)
+
 let parseConfig path =
   let json = Yojson.Basic.from_file path in
   let open Yojson.Basic.Util in
@@ -56,6 +69,9 @@ let parseConfig path =
     | "NoReactComponent" ->
         let options = json |> member "options" in
         createNoReactComponentRule options
+    | "DisallowModule" ->
+        let options = json |> member "options" in
+        createDisallowModuleRule options
     | _ -> raise RuleDoesNotExist
   in
   json |> member "rules" |> to_list |> List.map filter_rule

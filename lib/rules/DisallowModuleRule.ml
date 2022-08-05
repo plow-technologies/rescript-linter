@@ -7,7 +7,9 @@ end
 module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
   let description =
     match OPT.options.suggested_module with
-    | Some op -> "[Rescript] Do not use " ^ OPT.options.disallowed_module ^ ", please use " ^ op ^ " instead."
+    | Some op ->
+        "[Rescript] Do not use module " ^ OPT.options.disallowed_module ^ ", please use module " ^ op
+        ^ " instead."
     | None -> "[Rescript] Do not use " ^ OPT.options.disallowed_module
 
   let op = OPT.options.Options.disallowed_module
