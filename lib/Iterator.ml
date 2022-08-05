@@ -35,10 +35,14 @@ let withExpression iterator f callback =
 let makeIterator rules callback =
   let f iterator rule =
     let module R = (val rule : Rule.HASRULE) in
-    match R.proxy with
-    | Rule.MExpression -> withExpression iterator R.lint callback
-    | Rule.MStructure -> withStructure iterator R.lint callback
-    | Rule.MStructureItem -> withStructureItem iterator R.lint callback
-    | Rule.MPattern -> withPattern iterator R.lint callback
+    let linters = R.lint in
+    let buildIterator iterator lint =
+      match lint with
+      | Rule.LintExpression lintFunc -> withExpression iterator lintFunc callback
+      | Rule.LintStructure lintFunc -> withStructure iterator lintFunc callback
+      | Rule.LintStructureItem lintFunc -> withStructureItem iterator lintFunc callback
+      | Rule.LintPattern lintFunc -> withPattern iterator lintFunc callback
+    in
+    List.fold_left buildIterator iterator linters
   in
   List.fold_left f Ast_iterator.default_iterator rules

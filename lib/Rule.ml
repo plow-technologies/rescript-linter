@@ -1,23 +1,19 @@
 open Rescript_parser
 
-type _ modifier =
-  | MExpression : Parsetree.expression modifier
-  | MStructure : Parsetree.structure modifier
-  | MStructureItem : Parsetree.structure_item modifier
-  | MPattern : Parsetree.pattern modifier
-
 type lintResult = LintError of string * Location.t | LintOk
+
+type linter =
+  | LintExpression of (Parsetree.expression -> lintResult)
+  | LintStructure of (Parsetree.structure -> lintResult)
+  | LintStructureItem of (Parsetree.structure_item -> lintResult)
+  | LintPattern of (Parsetree.pattern -> lintResult)
 
 type meta = {ruleIdentifier: string; ruleName: string; ruleDescription: string}
 
 module type HASRULE = sig
-  type t
-
-  val proxy : t modifier
-
   val meta : meta
 
-  val lint : t -> lintResult
+  val lint : linter list
 end
 
 module type OPTIONS = sig
