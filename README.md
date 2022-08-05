@@ -149,16 +149,20 @@ By convention, you should write a new rule on its own module in `lib/rules`.
 Each rule module must have the signature of `Rule.HASRULE`.
 
 ```ocaml
+type linter =
+  | LintExpression of (Parsetree.expression -> lintResult)
+  | LintStructure of (Parsetree.structure -> lintResult)
+  | LintStructureItem of (Parsetree.structure_item -> lintResult)
+  | LintPattern of (Parsetree.pattern -> lintResult)
+
 module type HASRULE = sig
-  type t
-  val proxy : t modifier
   val meta : meta
-  val lint : t -> lintResult
+  val lint : linter list
 end
 ```
 
 - `meta` allows you to define name and the rule description
-- `proxy` and `type t` should be based on the type of AST that you would like to capture
+-
 - then you should write the `lint` function that receive the AST based on type `t` and this function should return either `LintOk` or `LintError`
 
 #### Rule with options

@@ -33,5 +33,5 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASR
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 
-  let lint = [lintExpression]
+  let linters = [lintExpression]
 end

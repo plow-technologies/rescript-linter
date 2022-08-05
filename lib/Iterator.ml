@@ -35,7 +35,6 @@ let withExpression iterator f callback =
 let makeIterator rules callback =
   let f iterator rule =
     let module R = (val rule : Rule.HASRULE) in
-    let linters = R.lint in
     let buildIterator iterator lint =
       match lint with
       | Rule.LintExpression lintFunc -> withExpression iterator lintFunc callback
@@ -43,6 +42,6 @@ let makeIterator rules callback =
       | Rule.LintStructureItem lintFunc -> withStructureItem iterator lintFunc callback
       | Rule.LintPattern lintFunc -> withPattern iterator lintFunc callback
     in
-    List.fold_left buildIterator iterator linters
+    List.fold_left buildIterator iterator R.linters
   in
   List.fold_left f Ast_iterator.default_iterator rules

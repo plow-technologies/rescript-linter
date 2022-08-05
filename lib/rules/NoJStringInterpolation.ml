@@ -17,5 +17,5 @@ module Rule : Rule.HASRULE = struct
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 
-  let lint = [lintExpresion]
+  let linters = [lintExpresion]
 end

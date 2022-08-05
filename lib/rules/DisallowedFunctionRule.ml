@@ -41,5 +41,5 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASR
             match results with [] -> Rule.LintOk | _ -> Rule.LintError (meta.ruleDescription, loc) )
         | _ -> Rule.LintOk )
 
-  let lint = [lintExpression]
+  let linters = [lintExpression]
 end

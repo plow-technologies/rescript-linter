@@ -13,7 +13,7 @@ type meta = {ruleIdentifier: string; ruleName: string; ruleDescription: string}
 module type HASRULE = sig
   val meta : meta
 
-  val lint : linter list
+  val linters : linter list
 end
 
 module type OPTIONS = sig
