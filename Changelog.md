@@ -1,3 +1,7 @@
+
+### 2022-09-19 - v0.2.1
+* Add suggested_component for NoReactComponent rule
+
 ### 2022-08-05 - v0.2.0
 * Redesign how AST is parsed to each rule (allow for multiple AST roots)
 * New rule: DisallowModuleRule
