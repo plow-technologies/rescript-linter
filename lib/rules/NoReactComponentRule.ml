@@ -6,12 +6,14 @@ end
 
 module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
   let disallowed_component_name = OPT.options.Options.component_name
+
   let optional_suggested_component_name = OPT.options.Options.suggested_component_name
 
   let description =
-    match OPT.options.optional_suggested_component_name with
+    match optional_suggested_component_name with
     | Some suggested_component_name ->
-        "[Rescript] Don't use " ^ disallowed_component_name ^ " component, please use " ^ suggested_component_name ^ " instead."
+        "[Rescript] Don't use " ^ disallowed_component_name ^ " component, please use "
+        ^ suggested_component_name ^ " instead."
     | None -> "[Rescript] Don't use " ^ disallowed_component_name ^ " component."
 
   let meta =

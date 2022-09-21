@@ -28,7 +28,7 @@ let createDisallowFunctionRule options =
   end) in
   (module M : Rule.HASRULE)
 
-let createNoJStringInterpolationRule () = (module NoJStringInterpolationRule: Rule.HASRULE)
+let createNoJStringInterpolationRule () = (module NoJStringInterpolationRule : Rule.HASRULE)
 
 let createNoReactComponentRule options =
   let open Yojson.Basic.Util in
@@ -37,10 +37,9 @@ let createNoReactComponentRule options =
   let module M = NoReactComponentRule.Make (struct
     type options = NoReactComponentRule.Options.options
 
-    let options = 
+    let options =
       { NoReactComponentRule.Options.component_name
-      ; NoReactComponentRule.Option.suggested_component_name= Some suggested_component_name
-      }
+      ; NoReactComponentRule.Options.suggested_component_name= Some suggested_component_name }
   end) in
   (module M : Rule.HASRULE)
 
