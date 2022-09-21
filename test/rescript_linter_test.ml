@@ -34,7 +34,10 @@ end)
 module NoInnerComponentRule = NoReactComponentRule.Make (struct
   type options = NoReactComponentRule.Options.options
 
-  let options = {NoReactComponentRule.Options.component_name= "Inner"}
+  let options = 
+    { NoReactComponentRule.Options.component_name= "Inner"
+    ; NoReactComponentRule.Options.suggested_component_name= Some "SafeInner"
+    }
 end)
 
 module NoCSSModuleRule = DisallowModuleRule.Make (struct

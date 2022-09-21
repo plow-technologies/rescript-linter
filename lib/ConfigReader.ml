@@ -33,10 +33,14 @@ let createNoJStringInterpolationRule () = (module NoJStringInterpolationRule: Ru
 let createNoReactComponentRule options =
   let open Yojson.Basic.Util in
   let component_name = options |> member "component" |> to_string in
+  let suggested_component_name = options |> member "suggested_component" |> to_string in
   let module M = NoReactComponentRule.Make (struct
     type options = NoReactComponentRule.Options.options
 
-    let options = {NoReactComponentRule.Options.component_name}
+    let options = 
+      { NoReactComponentRule.Options.component_name
+      ; NoReactComponentRule.Option.suggested_component_name= Some suggested_component_name
+      }
   end) in
   (module M : Rule.HASRULE)
 
