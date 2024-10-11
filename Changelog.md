@@ -1,4 +1,8 @@
 
+### 2024-10-11 - v0.2.2
+* Added a new rule for disallowing regex literals in functions.
+  * With the rule enabled the literals must be assigned to a variable and then the variable must have a test specified somewhere in the specified directory in the config file.
+
 ### 2022-09-19 - v0.2.1
 * Add suggested_component for NoReactComponent rule
 
