@@ -11,7 +11,7 @@
       "rule": "DisallowFunction",
       "options": {
         "disallowed_function": "string_of_int",
-        "suggested_function": "Belt.Int.fromString"
+        "suggested_function": "Belt.Int.toString"
       }
     },
     {
@@ -34,13 +34,15 @@
     {
       "rule": "NoReactComponent",
       "options": {
-        "component": "input2"
+        "component": "input2",
+        "suggested_component": "OnpingUi_Input_Int/Float/Text"
       }
     },
     {
       "rule": "NoReactComponent",
       "options": {
-        "component": "Inner"
+        "component": "button",
+        "suggested_component": "OnpingUi/OnpingUi_Button"
       }
     },
     {
@@ -48,6 +50,19 @@
       "options": {
         "disallowed_module": "Css",
         "suggested_module": "CssJs"
+      }
+    },
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_module": "OnpingUi_NumberInput",
+        "suggested_module": "OnpingUi/Form/OnpingUi_*"
+      }
+    },
+    {
+      "rule": "DisallowEmbeddedRegexLiteral",
+      "options": {
+        "test_directory": "./test/testData/"
       }
     }
   ]

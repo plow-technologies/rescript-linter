@@ -49,6 +49,12 @@ module NoCSSModuleRule = DisallowModuleRule.Make (struct
     ; DisallowModuleRule.Options.suggested_module= Some "CssJS" }
 end)
 
+module DisallowedEmbeddedRegexLiteralRule = DisallowedEmbeddedRegexLiteralRule.Make (struct
+  type options = DisallowedEmbeddedRegexLiteralRule.Options.options
+
+  let options = {DisallowedEmbeddedRegexLiteralRule.Options.test_directory= "testData"}
+end)
+
 type parseResult = {ast: Parsetree.structure; comments: Res_comment.t list}
 
 let parseAst path =
@@ -183,6 +189,17 @@ module Tests = struct
     match errors with
     | [_; _] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
+
+  let disallowed_embedded_regex_literal_test () =
+    let parseResult = parseAst "testData/disallowed_embedded_regex_literal_test.res" in
+    let errors =
+      Linter.lint
+        [(module DisallowedEmbeddedRegexLiteralRule : Rule.HASRULE)]
+        parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_] -> Alcotest.(check pass) "Same error message" [] []
+    | _ -> Alcotest.fail "Should only have one lint error"
 end
 
 (* Run it *)
@@ -206,4 +223,7 @@ let () =
     ; ( "Disallow module"
       , [ test_case "open module" `Quick Tests.disallow_module_test_1
         ; test_case "alias module" `Quick Tests.disallow_module_test_2
-        ; test_case "direct access module" `Quick Tests.disallow_module_test_3 ] ) ]
+        ; test_case "direct access module" `Quick Tests.disallow_module_test_3 ] )
+    ; ( "Disallowed embedded regex literal"
+      , [test_case "Disallowed embedded regex literal" `Quick Tests.disallowed_embedded_regex_literal_test] )
+    ]

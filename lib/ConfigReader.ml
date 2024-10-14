@@ -56,6 +56,16 @@ let createDisallowModuleRule options =
   end) in
   (module M : Rule.HASRULE)
 
+let createDisallowEmbeddedRegexLiteralRule options =
+  let open Yojson.Basic.Util in
+  let test_directory = options |> member "test_directory" |> to_string in
+  let module M = DisallowedEmbeddedRegexLiteralRule.Make (struct
+    type options = DisallowedEmbeddedRegexLiteralRule.Options.options
+
+    let options = {DisallowedEmbeddedRegexLiteralRule.Options.test_directory}
+  end) in
+  (module M : Rule.HASRULE)
+
 let parseConfig path =
   let json = Yojson.Basic.from_file path in
   let open Yojson.Basic.Util in
@@ -75,6 +85,9 @@ let parseConfig path =
     | "DisallowModule" ->
         let options = json |> member "options" in
         createDisallowModuleRule options
+    | "DisallowEmbeddedRegexLiteral" ->
+        let options = json |> member "options" in
+        createDisallowEmbeddedRegexLiteralRule options
     | _ -> raise RuleDoesNotExist
   in
   json |> member "rules" |> to_list |> List.map filter_rule
