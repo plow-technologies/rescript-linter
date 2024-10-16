@@ -1,5 +1,3 @@
-open Rescript_parser
-
 let findTextInComments comments needle =
   let f (comment : Res_comment.t) =
     let txt = Res_comment.txt comment in
@@ -36,7 +34,7 @@ let run configPath path =
   (* if you want to target the printer use: let mode = Res_parser.Default in*)
   let p = Res_parser.make ~mode:Res_parser.Default src path in
   let comments = p.comments in
-  let ast = Res_core.parseImplementation p in
+  let ast = Res_core.parse_implementation p in
   match p.diagnostics with
   | [] -> (
       let errors = lint rules ast comments in
@@ -48,5 +46,5 @@ let run configPath path =
           Printer.printHelp () ; exit 1 )
   | diagnostics ->
       (* parser contains problems *)
-      Res_diagnostics.printReport diagnostics src ;
+      Res_diagnostics.print_report diagnostics src ;
       exit 1

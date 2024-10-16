@@ -1,6 +1,4 @@
-(dirs bin lib syntax test)
-
-(vendored_dirs rescript_parser)
+(dirs bin lib compiler test)
 
 (env
  (dev

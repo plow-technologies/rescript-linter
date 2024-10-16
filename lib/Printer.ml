@@ -1,18 +1,17 @@
-open Rescript_parser
-
-let formatMessage ppf src ({loc; msg} : Location.error) =
-  Res_diagnostics_printing_utils.Super_location.setup_colors () ;
-  (* open a vertical box. Everything in our message is indented 2 spaces *)
-  (* Format.fprintf ppf "@[<v>@, %a@, %s@,@]" (print ~message_kind:`error "We've found a bug for you!") src
-     loc msg; *)
-  Format.fprintf ppf "@[<v>@,  %a@,  %s@,@]"
-    (Res_diagnostics_printing_utils.Super_location.print ~message_kind:`error "Lint error!" src)
-    loc msg
-
 let printError src msg d =
-  formatMessage Format.std_formatter src
+  Misc.Color.setup !Clflags.color ;
+  Code_frame.setup !Clflags.color ;
+  Format.fprintf Format.std_formatter "@[<v>@,  %a@,  %s@,@]"
+    (Location.print ~src:(Some src) ~message_kind:`error "Lint Error!")
+    Location.{loc_start= d.loc_start; loc_end= d.loc_end; loc_ghost= false}
+    msg ;
+  List.iter
+    (Format.fprintf Format.std_formatter "@,@[%a@]" (Location.default_error_reporter ~src:(Some src)))
+    []
+
+(* Location.default_error_reporter ?src:(Some (Some src)) Format.std_formatter
     Location.
-      {loc= {loc_start= d.loc_start; loc_end= d.loc_end; loc_ghost= false}; msg; sub= []; if_highlight= ""}
+      {loc= ; msg; sub= []; if_highlight= ""} *)
 
 let printHelp () =
   print_newline () ;

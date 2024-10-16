@@ -1,5 +1,3 @@
-open Rescript_parser
-
 module Options = struct
   type options = {disallowed_function: string; suggested_function: string option}
 end

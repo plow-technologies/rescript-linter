@@ -1,5 +1,3 @@
-open Rescript_parser
-
 module Options = struct
   type options = {component_name: string; suggested_component_name: string option}
 end

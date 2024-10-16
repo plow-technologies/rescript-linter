@@ -1,5 +1,3 @@
-open Rescript_parser
-
 let rec mapSnd (lst : ('a * 'b) list) : 'b list = match lst with [] -> [] | h :: t -> snd h :: mapSnd t
 
 let rec map (f : 'a -> 'b) (lst : 'a list) : 'b list = match lst with [] -> [] | h :: t -> f h :: map f t
@@ -71,11 +69,11 @@ let getAllVariablesUsedInJsReTest src =
     | _ -> LintOk
   in
   let iterator = Iterator.withExpression Ast_iterator.default_iterator lintFunc callback in
-  let ast = Res_core.parseImplementation p in
+  let ast = Res_core.parse_implementation p in
   match p.diagnostics with
   | [] -> iterator.structure iterator ast ; !variables
   | diagnostics ->
-      Res_diagnostics.printReport diagnostics src ;
+      Res_diagnostics.print_report diagnostics src ;
       exit 1
 
 let getAllVariablesUsedInJsReTests path =
