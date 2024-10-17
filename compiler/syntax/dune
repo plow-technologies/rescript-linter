@@ -1,9 +1,0 @@
-(dirs compiler-libs-406 src cli)
-
-(env
- (dev
-  (flags
-   (:standard -w -A)))
- (release
-  (flags
-   (:standard -w -A))))

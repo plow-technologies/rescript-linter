@@ -1,0 +1,33 @@
+{
+  "gentypeconfig": {
+    "language": "typescript",
+    "module": "esmodule",
+    "importPath": "relative",
+    "shims": {
+      "Js": "Js",
+      "ReactEvent": "ReactEvent",
+      "RescriptPervasives": "RescriptPervasives",
+      "ReasonReact": "ReactShim"
+    },
+    "debug": {
+      "all": false
+    },
+    "exportInterfaces": false
+  },
+  "name": "sample-typescript-app",
+  "bsc-flags": [],
+  "jsx": { "version": 3 },
+  "bs-dependencies": ["@rescript/react"],
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "uncurried": false,
+  "package-specs": {
+    "module": "esmodule",
+    "in-source": true
+  },
+  "suffix": ".res.js"
+}

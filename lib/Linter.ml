@@ -34,7 +34,7 @@ let run configPath path =
   (* if you want to target the printer use: let mode = Res_parser.Default in*)
   let p = Res_parser.make ~mode:Res_parser.Default src path in
   let comments = p.comments in
-  let ast = Res_core.parse_implementation p in
+  let ast = Res_core.parseImplementation p in
   match p.diagnostics with
   | [] -> (
       let errors = lint rules ast comments in
@@ -46,5 +46,5 @@ let run configPath path =
           Printer.printHelp () ; exit 1 )
   | diagnostics ->
       (* parser contains problems *)
-      Res_diagnostics.print_report diagnostics src ;
+      Res_diagnostics.printReport diagnostics src ;
       exit 1

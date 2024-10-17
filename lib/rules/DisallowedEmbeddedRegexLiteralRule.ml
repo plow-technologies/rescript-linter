@@ -69,11 +69,11 @@ let getAllVariablesUsedInJsReTest src =
     | _ -> LintOk
   in
   let iterator = Iterator.withExpression Ast_iterator.default_iterator lintFunc callback in
-  let ast = Res_core.parse_implementation p in
+  let ast = Res_core.parseImplementation p in
   match p.diagnostics with
   | [] -> iterator.structure iterator ast ; !variables
   | diagnostics ->
-      Res_diagnostics.print_report diagnostics src ;
+      Res_diagnostics.printReport diagnostics src ;
       exit 1
 
 let getAllVariablesUsedInJsReTests path =

@@ -1,4 +1,4 @@
-(lang dune 3.3)
+(lang dune 3.16)
 
 (name rescript_linter)
 
@@ -19,4 +19,4 @@
  (name rescript_linter)
  (synopsis "AST-based linter for ReScript")
  (description "AST-based linter for ReScript")
- (depends ocaml dune rescript_compiler))
+ (depends ocaml dune yojson alcotest ounit2))

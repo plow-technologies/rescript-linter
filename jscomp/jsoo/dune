@@ -1,0 +1,10 @@
+; Don't build the JS compiler by default as it slows down CI considerably.
+
+(executables
+ (names jsoo_playground_main)
+ (modes js)
+ (enabled_if
+  (= %{profile} browser))
+ (flags
+  (:standard -w -A))
+ (libraries core syntax ml js_of_ocaml))
