@@ -1,5 +1,3 @@
-open Rescript_parser
-
 let withPattern iterator f callback =
   { iterator with
     Ast_iterator.pat=

@@ -1,8 +1,8 @@
-(lang dune 3.3)
+(lang dune 3.14)
 
 (name rescript_linter)
 
-(version 0.2.2)
+(version 0.3.0)
 
 (generate_opam_files true)
 
@@ -19,4 +19,4 @@
  (name rescript_linter)
  (synopsis "AST-based linter for ReScript")
  (description "AST-based linter for ReScript")
- (depends ocaml dune))
+ (depends dune yojson))

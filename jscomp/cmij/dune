@@ -1,0 +1,11 @@
+(env
+ (static
+  (flags
+   (:standard -ccopt -static))))
+
+(executables
+ (names cmjdump_main)
+ (public_names cmjdump)
+ (flags
+  (:standard -w -A))
+ (libraries core))

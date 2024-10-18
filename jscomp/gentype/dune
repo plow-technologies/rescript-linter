@@ -1,0 +1,6 @@
+(library
+ (name gentype)
+ (wrapped false)
+ (flags
+  (:standard -w -A))
+ (libraries ml))

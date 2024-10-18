@@ -1,0 +1,9 @@
+(library
+ (name common)
+ (wrapped false)
+ (preprocess
+  (action
+   (run %{bin:cppo} %{env:CPPO_FLAGS=} %{input-file})))
+ (flags
+  (:standard -w -A))
+ (libraries syntax))

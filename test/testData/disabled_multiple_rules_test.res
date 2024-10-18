@@ -3,4 +3,4 @@
 
 let _ = string_of_int(0)
 let _ = intOfStringOpt("1")
-let _ = "hello" |> React.string
+let _ = "hello" -> React.string

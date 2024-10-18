@@ -1,5 +1,3 @@
-open Rescript_parser
-
 type lintResult = LintError of string * Location.t | LintOk
 
 type linter =

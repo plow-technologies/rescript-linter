@@ -1,0 +1,11 @@
+(library
+ (name ml)
+ (wrapped false)
+ (preprocess
+  (action
+   (run %{bin:cppo} %{env:CPPO_FLAGS=} %{input-file})))
+ (flags
+  (:standard -w -A))
+ (libraries ext js_parser))
+
+(ocamllex lexer)

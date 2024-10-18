@@ -1,5 +1,3 @@
-open Rescript_parser
-
 module Options = struct
   type options = {disallowed_operator: string; suggested_operator: string option}
 end
@@ -26,7 +24,7 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASR
         | { Parsetree.pexp_desc=
               Pexp_apply ({pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}, _)
           }
-          when ident = op ->
+          when ident == op ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 

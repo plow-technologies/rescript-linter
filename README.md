@@ -7,16 +7,14 @@ An AST based linter for ReScript. Write your rule based on ReScript AST.
 ## Building the project
 
 ```
-git submodule update --init --recursive
 opam install . --deps-only --with-doc --with-test
 dune build
 ```
 
-or with Nix,
+or with Nix (flakes),
 
 ```
-git submodule update --init --recursive
-nix-build
+nix build
 ```
 
 ### To run the test
@@ -25,7 +23,15 @@ nix-build
 dune runtest
 ```
 
+or with Nix (flakes),
+
+```
+nix flake check
+```
+
 ## Running the parser
+
+
 
 ### Config file
 
@@ -72,6 +78,12 @@ Once you build the project, you can copy the resulting binary. Or you can also r
 
 ```
 dune exec -- rescript_linter -c config.json foo.res
+```
+
+or run it with Nix (flakes),
+
+```
+nix run .#rescript-linter -- -c config.json foo.res
 ```
 
 ### Disabling lint
