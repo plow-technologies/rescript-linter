@@ -9,9 +9,8 @@ license: "LICENSE"
 homepage: "https://github.com/plow-technologies/rescript-linter"
 bug-reports: "https://github.com/plow-technologies/rescript-linter/issues"
 depends: [
-  "ocaml"
-  "dune" {>= "3.3"}
-  "rescript_compiler"
+  "dune" {>= "3.14"}
+  "yojson"
   "odoc" {with-doc}
 ]
 build: [
