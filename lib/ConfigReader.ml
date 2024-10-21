@@ -28,8 +28,6 @@ let createDisallowFunctionRule options =
   end) in
   (module M : Rule.HASRULE)
 
-let createNoJStringInterpolationRule () = (module NoJStringInterpolationRule : Rule.HASRULE)
-
 let createNoReactComponentRule options =
   let open Yojson.Basic.Util in
   let component_name = options |> member "component" |> to_string in
@@ -78,7 +76,6 @@ let parseConfig path =
     | "DisallowFunction" ->
         let options = json |> member "options" in
         createDisallowFunctionRule options
-    | "NoJStringInterpolation" -> createNoJStringInterpolationRule ()
     | "NoReactComponent" ->
         let options = json |> member "options" in
         createNoReactComponentRule options

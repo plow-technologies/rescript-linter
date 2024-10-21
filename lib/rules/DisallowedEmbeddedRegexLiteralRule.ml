@@ -1,5 +1,3 @@
-open Rescript_parser
-
 let rec mapSnd (lst : ('a * 'b) list) : 'b list = match lst with [] -> [] | h :: t -> snd h :: mapSnd t
 
 let rec map (f : 'a -> 'b) (lst : 'a list) : 'b list = match lst with [] -> [] | h :: t -> f h :: map f t

@@ -2,4 +2,4 @@
 
 (library
  (name rescript_linter)
- (libraries unix yojson rescript_parser))
+ (libraries unix yojson rescript_compiler))

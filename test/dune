@@ -1,5 +1,5 @@
 (test
  (name rescript_linter_test)
- (libraries alcotest rescript_linter)
+ (libraries alcotest rescript_compiler rescript_linter)
  (deps
   (glob_files "testData/*")))

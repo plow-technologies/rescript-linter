@@ -1,5 +1,3 @@
-open Rescript_parser
-
 let findTextInComments comments needle =
   let f (comment : Res_comment.t) =
     let txt = Res_comment.txt comment in

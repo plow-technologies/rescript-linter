@@ -1,0 +1,9 @@
+(library
+ (name core)
+ (wrapped false)
+ (preprocess
+  (action
+   (run %{bin:cppo} %{env:CPPO_FLAGS=} %{input-file})))
+ (flags
+  (:standard -w -A))
+ (libraries depends ext frontend gentype js_parser))

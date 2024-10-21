@@ -29,9 +29,6 @@
       }
     },
     {
-      "rule": "NoJStringInterpolation"
-    },
-    {
       "rule": "NoReactComponent",
       "options": {
         "component": "input2",

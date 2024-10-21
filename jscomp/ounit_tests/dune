@@ -1,0 +1,13 @@
+(env
+ (static
+  (flags
+   (:standard -ccopt -static))))
+
+(executable
+ (name ounit_tests_main)
+ (public_name ounit_tests)
+ (enabled_if
+  (<> %{profile} browser))
+ (flags
+  (:standard -w -A))
+ (libraries bsb bsb_helper core ounit2))
