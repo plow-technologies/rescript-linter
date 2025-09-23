@@ -46,10 +46,12 @@ module DisallowedEmbeddedRegexLiteralRule = DisallowedEmbeddedRegexLiteralRule.M
   let options = {DisallowedEmbeddedRegexLiteralRule.Options.test_directory= "testData"}
 end)
 
-module DisallowedDeadCodeRule = DisallowedDeadCodeRule.Make (struct
-  type options = DisallowedDeadCodeRule.Options.options
+module DisallowedAttributeRule = DisallowedAttributeRule.Make (struct
+  type options = DisallowedAttributeRule.Options.options
 
-  let options = DisallowedDeadCodeRule.default
+  let options =
+    { DisallowedAttributeRule.Options.attribute= "dead"
+    ; DisallowedAttributeRule.Options.suggestion= Some "Remove, refactor, or mark as @live" }
 end)
 
 type parseResult = {ast: Parsetree.structure; comments: Res_comment.t list}
@@ -132,7 +134,7 @@ module Tests = struct
       Linter.lint
         [ (module DisallowStringOfIntRule : Rule.HASRULE)
         ; (module DisallowInOfStringOptRule : Rule.HASRULE)
-        ; (module DisallowedDeadCodeRule : Rule.HASRULE) ]
+        ; (module DisallowedAttributeRule : Rule.HASRULE) ]
         parseResult.ast parseResult.comments
     in
     match errors with
@@ -194,7 +196,7 @@ module Tests = struct
   let disallowed_dead_code_test () =
     let parseResult = parseAst "testData/disallowed_dead_code_test.res" in
     let errors =
-      Linter.lint [(module DisallowedDeadCodeRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+      Linter.lint [(module DisallowedAttributeRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     let expectedDeadTypes =
       [ "[expression]"
@@ -214,8 +216,8 @@ module Tests = struct
       ; "[label]" ]
     in
     match errors with
-    | [] -> Alcotest.(check pass) "No lint errors" [] []
-    | errors when List.length errors == List.length expectedDeadTypes -> (
+    | [] -> Alcotest.fail ("No lint errors: " ^ DisallowedAttributeRule.meta.ruleDescription)
+    | errors when List.length errors = List.length expectedDeadTypes -> (
       match
         List.combine errors expectedDeadTypes
         |> List.for_all (fun ((errString, _errLoc), expected) -> contains_substring errString expected)

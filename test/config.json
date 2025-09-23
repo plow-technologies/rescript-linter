@@ -1,7 +1,10 @@
 {
   "rules": [
     {
-      "rule": "DisallowDeadCode"
+      "rule": "DisallowAttribute",
+      "options": {
+        "attribute": "dead"
+      }
     },
     {
       "rule": "DisallowOperator",

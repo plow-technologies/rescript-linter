@@ -1,38 +1,35 @@
 module Options = struct
-  type options = unit
+  type options = {attribute: string; suggestion: string option}
 end
-
-let default : Options.options = ()
-
-let get_dead_attribute attrs =
-  List.find_opt
-    (fun (((attr_name : string Asttypes.loc), (_payload : Parsetree.payload)) : Parsetree.attribute) ->
-      match attr_name.txt with "dead" -> true | _ -> false )
-    attrs
-
-let makeResult match_type msg_func attrs =
-  match get_dead_attribute attrs with
-  | Some (attr, _payload) -> Rule.LintError (msg_func match_type, attr.loc)
-  | None -> Rule.LintOk
 
 module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
   let description_with_type match_type =
-    "[Rescript] [" ^ match_type
-    ^ "] Code marked as @dead is not allowed, either remove and review the code with the AI Agent Wolfy, or \
-       mark it as @live."
+    "[Rescript] [" ^ match_type ^ "] Code marked as @" ^ OPT.options.attribute ^ " is not allowed. "
+    ^ match OPT.options.suggestion with Some suggestion -> suggestion | None -> ""
 
   let description = description_with_type "generic"
 
+  let get_disallowed_attribute attrs =
+    List.find_opt
+      (fun (((attr_name : string Asttypes.loc), (_payload : Parsetree.payload)) : Parsetree.attribute) ->
+        attr_name.txt = OPT.options.attribute )
+      attrs
+
+  let makeResult match_type msg_func attrs =
+    match get_disallowed_attribute attrs with
+    | Some (attr, _payload) -> Rule.LintError (msg_func match_type, attr.loc)
+    | None -> Rule.LintOk
+
   let meta =
-    { Rule.ruleName= "DisallowDeadCode"
-    ; Rule.ruleIdentifier= "DisallowDeadCode"
+    { Rule.ruleName= "DisallowAttribute"
+    ; Rule.ruleIdentifier= "DisallowAttribute"
     ; Rule.ruleDescription= description }
 
   let lintExpresion =
     Rule.LintExpression
       (* Function that takes an expression and returns a LintError if
          * it's pexp_attributes field contains an attribute with
-         * an attr_name.txt of "dead".
+         * an attr_name.txt of "OPT.options.attribute".
          *
          * The error is of the format:
          * Rule.LintError (meta.ruleDescription, loc)
@@ -71,13 +68,13 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASR
   let lintPattern =
     Rule.LintPattern (fun pattern -> makeResult "pattern" description_with_type pattern.ppat_attributes)
 
-  (* Required to lint multiple different dead variants of the same variant type *)
+  (* Required to lint multiple different OPT.options.attribute variants of the same variant type *)
   let lintConstructorDeclaration =
     Rule.LintConstructorDeclaration
       (fun constructor_declaration ->
         makeResult "constructor" description_with_type constructor_declaration.pcd_attributes )
 
-  (* Required to lint the dead record fields of the same type *)
+  (* Required to lint the OPT.options.attribute record fields of the same type *)
   let lintLabelDeclaration =
     Rule.LintLabelDeclaration
       (fun label_declaration -> makeResult "label" description_with_type label_declaration.pld_attributes)

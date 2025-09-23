@@ -15,6 +15,10 @@ type linter =
 
 type meta = {ruleIdentifier: string; ruleName: string; ruleDescription: string}
 
+let meta_to_string meta =
+  Printf.sprintf "{ ruleIdentifier: %s; ruleName: %s; ruleDescription: %s }" meta.ruleIdentifier meta.ruleName
+    meta.ruleDescription
+
 module type HASRULE = sig
   val meta : meta
 

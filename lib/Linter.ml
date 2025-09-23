@@ -30,6 +30,13 @@ let lint rules structure comments =
 
 let run configPath path =
   let rules = ConfigReader.parseConfig configPath in
+  Format.fprintf Format.std_formatter "Linting rules:\n%s"
+    (String.concat "\n"
+       (List.map
+          (fun rule ->
+            let module R = (val rule : Rule.HASRULE) in
+            Rule.meta_to_string R.meta )
+          rules ) ) ;
   let src = processFile path in
   (* if you want to target the printer use: let mode = Res_parser.Default in*)
   let p = Res_parser.make ~mode:Res_parser.Default src path in

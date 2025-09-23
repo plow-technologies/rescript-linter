@@ -1,7 +1,8 @@
 # ReScript Linter Changelog
 
 ### 2025-09-23 - v0.3.1
-* Added a `DisallowDeadCode` rule to disallow code tagged with @dead
+* Added a `DisallowAttribute` rule to disallow code tagged with an @attribute
+  * Currently only tested for `@dead` so this is still experimental
 * Added the following as iteration targets
   * LintTypeKind
   * LintLabelDeclaration

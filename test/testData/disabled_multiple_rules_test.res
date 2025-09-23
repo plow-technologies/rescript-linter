@@ -1,6 +1,6 @@
 // RSLINT_DISABLE_DisallowFunction[string_of_int]
 // RSLINT_DISABLE_DisallowFunction[intOfStringOpt]
-// RSLINT_DISABLE_DisallowDeadCode
+// RSLINT_DISABLE_DisallowAttribute
 
 let _ = string_of_int(0)
 let _ = intOfStringOpt("1")
