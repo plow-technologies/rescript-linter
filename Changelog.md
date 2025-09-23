@@ -2,6 +2,16 @@
 
 ### 2025-09-23 - v0.3.1
 * Added a `DisallowAttribute` rule to disallow code tagged with an @attribute
+  * Requires :
+    ```json
+    {
+      "rule": "DisallowAttribute",
+      "options": {
+        "attribute": "dead",
+        "suggestion": "Either review and remove the code with, or mark it as @live"
+      }
+    }
+    ```
   * Currently only tested for `@dead` so this is still experimental
 * Added the following as iteration targets
   * LintTypeKind
