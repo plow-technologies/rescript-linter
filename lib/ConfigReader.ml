@@ -64,6 +64,12 @@ let createDisallowEmbeddedRegexLiteralRule options =
   end) in
   (module M : Rule.HASRULE)
 
+module DisallowedDeadCodeRuleModule = DisallowedDeadCodeRule.Make (struct
+  type options = DisallowedDeadCodeRule.Options.options
+
+  let options = DisallowedDeadCodeRule.default
+end)
+
 let parseConfig path =
   let json = Yojson.Basic.from_file path in
   let open Yojson.Basic.Util in
@@ -85,6 +91,7 @@ let parseConfig path =
     | "DisallowEmbeddedRegexLiteral" ->
         let options = json |> member "options" in
         createDisallowEmbeddedRegexLiteralRule options
+    | "DisallowDeadCode" -> (module DisallowedDeadCodeRuleModule)
     | _ -> raise RuleDoesNotExist
   in
   json |> member "rules" |> to_list |> List.map filter_rule

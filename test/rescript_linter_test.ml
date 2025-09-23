@@ -46,7 +46,29 @@ module DisallowedEmbeddedRegexLiteralRule = DisallowedEmbeddedRegexLiteralRule.M
   let options = {DisallowedEmbeddedRegexLiteralRule.Options.test_directory= "testData"}
 end)
 
+module DisallowedDeadCodeRule = DisallowedDeadCodeRule.Make (struct
+  type options = DisallowedDeadCodeRule.Options.options
+
+  let options = DisallowedDeadCodeRule.default
+end)
+
 type parseResult = {ast: Parsetree.structure; comments: Res_comment.t list}
+
+let loc_to_string (loc : Location.t) : string = Format.asprintf "%a" Location.print_loc loc
+
+let contains_substring s sub =
+  let len_s = String.length s in
+  let len_sub = String.length sub in
+  if len_sub = 0 then true (* An empty substring is always "contained" *)
+  else if len_sub > len_s then false (* Substring cannot be longer than the main string *)
+  else
+    let rec check_from_index i =
+      if i > len_s - len_sub then false (* No more possible starting positions *)
+      else
+        let extracted_sub = String.sub s i len_sub in
+        if String.equal extracted_sub sub then true else check_from_index (i + 1)
+    in
+    check_from_index 0
 
 let parseAst path =
   let src = Linter.processFile path in
@@ -108,12 +130,16 @@ module Tests = struct
     let parseResult = parseAst "testData/disabled_multiple_rules_test.res" in
     let errors =
       Linter.lint
-        [(module DisallowStringOfIntRule : Rule.HASRULE); (module DisallowInOfStringOptRule : Rule.HASRULE)]
+        [ (module DisallowStringOfIntRule : Rule.HASRULE)
+        ; (module DisallowInOfStringOptRule : Rule.HASRULE)
+        ; (module DisallowedDeadCodeRule : Rule.HASRULE) ]
         parseResult.ast parseResult.comments
     in
     match errors with
     | [] -> Alcotest.(check pass) "Same error message" [] []
-    | _ -> Alcotest.fail "Should have no lint errors"
+    | errors ->
+        Alcotest.fail
+          ("Should have no lint errors, but found:\n\t* " ^ String.concat "\n\t* " (List.map fst errors))
 
   let no_react_component_test_1 () =
     let parseResult = parseAst "testData/no_react_component_test_1.res" in
@@ -164,6 +190,58 @@ module Tests = struct
     match errors with
     | [_] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have one lint error"
+
+  let disallowed_dead_code_test () =
+    let parseResult = parseAst "testData/disallowed_dead_code_test.res" in
+    let errors =
+      Linter.lint [(module DisallowedDeadCodeRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
+    let expectedDeadTypes =
+      [ "[expression]"
+      ; "[expression]"
+      ; "[constructor]"
+      ; "[label]"
+      ; "[label]"
+      ; "[constructor]"
+      ; "[assignment]"
+      ; "[pattern]"
+      ; "[pattern]"
+      ; "[module]"
+      ; "[module]"
+      ; "[assignment]"
+      ; "[type]"
+      ; "[label]"
+      ; "[label]" ]
+    in
+    match errors with
+    | [] -> Alcotest.(check pass) "No lint errors" [] []
+    | errors when List.length errors == List.length expectedDeadTypes -> (
+      match
+        List.combine errors expectedDeadTypes
+        |> List.for_all (fun ((errString, _errLoc), expected) -> contains_substring errString expected)
+      with
+      | true -> Alcotest.(check pass) "Same error message" [] []
+      | false ->
+          Alcotest.fail
+            ( "Dead Code Errors: \nExpected errors in this order [" ^ String.concat ", " expectedDeadTypes
+            ^ "], but got "
+            ^ string_of_int (List.length errors)
+            ^ "\n"
+            ^ String.concat "\n"
+                (List.map
+                   (fun (str, loc) -> Printf.sprintf "\t* %s\n\t\t -> %s" str (loc_to_string loc))
+                   errors ) ) )
+    | errors ->
+        Alcotest.fail
+          ( "Dead Code Errors: \nExpected "
+          ^ string_of_int (List.length expectedDeadTypes)
+          ^ " errors, but got "
+          ^ string_of_int (List.length errors)
+          ^ "\n"
+          ^ String.concat "\n"
+              (List.map
+                 (fun (str, loc) -> Printf.sprintf "\t* %s\n\t\t -> %s" str (loc_to_string loc))
+                 errors ) )
 end
 
 (* Run it *)
@@ -187,4 +265,4 @@ let () =
         ; test_case "direct access module" `Quick Tests.disallow_module_test_3 ] )
     ; ( "Disallowed embedded regex literal"
       , [test_case "Disallowed embedded regex literal" `Quick Tests.disallowed_embedded_regex_literal_test] )
-    ]
+    ; ("Disallowed dead code", [test_case "Disallowed dead code" `Quick Tests.disallowed_dead_code_test]) ]

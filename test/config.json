@@ -1,6 +1,9 @@
 {
   "rules": [
     {
+      "rule": "DisallowDeadCode"
+    },
+    {
       "rule": "DisallowOperator",
       "options": {
         "disallowed_operator": "|>",

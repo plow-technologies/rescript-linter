@@ -1,3 +1,15 @@
+# ReScript Linter Changelog
+
+### 2025-09-23 - v0.3.1
+* Added a `DisallowDeadCode` rule to disallow code tagged with @dead
+* Added the following as iteration targets
+  * LintTypeKind
+  * LintLabelDeclaration
+  * LintConstructorDeclaration
+  * LintValueBinding
+  * LintTypeDeclaration
+  * LintModuleBinding
+  * LintClassTypeDeclaration
 
 ### 2024-10-16 - v0.3.0
 * Vendored the compiler subdirector of the rescript compiler repo to support newer syntax within the rescript language. This will allow for better parsing of the AST and better linting going forward
