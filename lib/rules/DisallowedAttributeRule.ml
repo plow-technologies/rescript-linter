@@ -2,7 +2,10 @@ module Options = struct
   type options = {attribute: string; suggestion: string option}
 end
 
-module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
+module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOptions : Rule.LinterOptions) :
+  Rule.HASRULE = struct
+  include LinterOptions
+
   let description_with_type match_type =
     "[Rescript] [" ^ match_type ^ "] Code marked as @" ^ OPT.options.attribute ^ " is not allowed. "
     ^ match OPT.options.suggestion with Some suggestion -> suggestion | None -> ""

@@ -13,8 +13,11 @@ let processFile path =
   close_in channel ; src
 
 let lint rules structure comments =
+  (* Track errors and warnings separately *)
   let errors = ref [] in
-  if hasDisableLintComment comments then !errors
+  let warnings = ref [] in
+  (* If there's a disable comment, skip linting, including warnings *)
+  if hasDisableLintComment comments then (!errors, !warnings)
   else
     let f acc rule =
       let module R = (val rule : Rule.HASRULE) in
@@ -23,10 +26,14 @@ let lint rules structure comments =
       if findTextInComments comments name || findTextInComments comments identifier then acc else acc @ [rule]
     in
     let rules = List.fold_left f [] rules in
-    let callback (pair : string * Location.t) = errors := !errors @ [pair] in
-    let iterator = Iterator.makeIterator rules callback in
+    (* Create the respecitive callbacks for tracking errors and warnings *)
+    let errorCallback (pair : string * Location.t) = errors := !errors @ [pair] in
+    let warningCallback (pair : string * Location.t) = warnings := !warnings @ [pair] in
+    (* Run the linter *)
+    let iterator = Iterator.makeIterator rules {errorCallback; warningCallback} in
     iterator.structure iterator structure ;
-    !errors
+    (* Report both errors and warnings *)
+    (!errors, !warnings)
 
 let run configPath path =
   let rules = ConfigReader.parseConfig configPath in
@@ -44,7 +51,11 @@ let run configPath path =
   let ast = Res_core.parseImplementation p in
   match p.diagnostics with
   | [] -> (
-      let errors = lint rules ast comments in
+      let errors, warnings = lint rules ast comments in
+      (* Always print warnings *)
+      List.iter (fun (msg, loc) -> Printer.printWarning src msg loc) warnings ;
+      (* Print an extra newline if there were warnings *)
+      if List.length warnings > 0 then print_newline () ;
       match errors with
       | [] -> print_endline "All good" ; exit 0
       | xs ->

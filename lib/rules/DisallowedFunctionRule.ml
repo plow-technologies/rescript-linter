@@ -2,7 +2,10 @@ module Options = struct
   type options = {disallowed_function: string; suggested_function: string option}
 end
 
-module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
+module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOptions : Rule.LinterOptions) :
+  Rule.HASRULE = struct
+  include LinterOptions
+
   let description =
     match OPT.options.suggested_function with
     | Some func_name ->

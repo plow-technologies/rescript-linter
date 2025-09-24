@@ -1,58 +1,98 @@
 open Rescript_linter
 
-module DisallowStringOfIntRule = DisallowedFunctionRule.Make (struct
-  type options = DisallowedFunctionRule.Options.options
+module TestingLinterOptions = struct
+  let warning = false
+end
 
-  let options =
-    { DisallowedFunctionRule.Options.disallowed_function= "string_of_int"
-    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
-end)
+module TestingLinterOptionsWarning = struct
+  let warning = true
+end
 
-module DisallowInOfStringOptRule = DisallowedFunctionRule.Make (struct
-  type options = DisallowedFunctionRule.Options.options
+module DisallowStringOfIntRule =
+  DisallowedFunctionRule.Make
+    (struct
+      type options = DisallowedFunctionRule.Options.options
 
-  let options =
-    { DisallowedFunctionRule.Options.disallowed_function= "intOfStringOpt"
-    ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
-end)
+      let options =
+        { DisallowedFunctionRule.Options.disallowed_function= "string_of_int"
+        ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
+    end)
+    (TestingLinterOptions)
 
-module NoInputComponentRule = NoReactComponentRule.Make (struct
-  type options = NoReactComponentRule.Options.options
+module DisallowStringOfIntRuleWarning =
+  DisallowedFunctionRule.Make
+    (struct
+      type options = DisallowedFunctionRule.Options.options
 
-  let options =
-    { NoReactComponentRule.Options.component_name= "input"
-    ; NoReactComponentRule.Options.suggested_component_name= None }
-end)
+      let options =
+        { DisallowedFunctionRule.Options.disallowed_function= "string_of_int"
+        ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
+    end)
+    (TestingLinterOptionsWarning)
 
-module NoInnerComponentRule = NoReactComponentRule.Make (struct
-  type options = NoReactComponentRule.Options.options
+module DisallowInOfStringOptRule =
+  DisallowedFunctionRule.Make
+    (struct
+      type options = DisallowedFunctionRule.Options.options
 
-  let options =
-    { NoReactComponentRule.Options.component_name= "Inner"
-    ; NoReactComponentRule.Options.suggested_component_name= Some "SafeInner" }
-end)
+      let options =
+        { DisallowedFunctionRule.Options.disallowed_function= "intOfStringOpt"
+        ; DisallowedFunctionRule.Options.suggested_function= Some "Belt.Int.fromString" }
+    end)
+    (TestingLinterOptions)
 
-module NoCSSModuleRule = DisallowModuleRule.Make (struct
-  type options = DisallowModuleRule.Options.options
+module NoInputComponentRule =
+  NoReactComponentRule.Make
+    (struct
+      type options = NoReactComponentRule.Options.options
 
-  let options =
-    { DisallowModuleRule.Options.disallowed_module= "Css"
-    ; DisallowModuleRule.Options.suggested_module= Some "CssJS" }
-end)
+      let options =
+        { NoReactComponentRule.Options.component_name= "input"
+        ; NoReactComponentRule.Options.suggested_component_name= None }
+    end)
+    (TestingLinterOptions)
 
-module DisallowedEmbeddedRegexLiteralRule = DisallowedEmbeddedRegexLiteralRule.Make (struct
-  type options = DisallowedEmbeddedRegexLiteralRule.Options.options
+module NoInnerComponentRule =
+  NoReactComponentRule.Make
+    (struct
+      type options = NoReactComponentRule.Options.options
 
-  let options = {DisallowedEmbeddedRegexLiteralRule.Options.test_directory= "testData"}
-end)
+      let options =
+        { NoReactComponentRule.Options.component_name= "Inner"
+        ; NoReactComponentRule.Options.suggested_component_name= Some "SafeInner" }
+    end)
+    (TestingLinterOptions)
 
-module DisallowedAttributeRule = DisallowedAttributeRule.Make (struct
-  type options = DisallowedAttributeRule.Options.options
+module NoCSSModuleRule =
+  DisallowModuleRule.Make
+    (struct
+      type options = DisallowModuleRule.Options.options
 
-  let options =
-    { DisallowedAttributeRule.Options.attribute= "dead"
-    ; DisallowedAttributeRule.Options.suggestion= Some "Remove, refactor, or mark as @live" }
-end)
+      let options =
+        { DisallowModuleRule.Options.disallowed_module= "Css"
+        ; DisallowModuleRule.Options.suggested_module= Some "CssJS" }
+    end)
+    (TestingLinterOptions)
+
+module DisallowedEmbeddedRegexLiteralRule =
+  DisallowedEmbeddedRegexLiteralRule.Make
+    (struct
+      type options = DisallowedEmbeddedRegexLiteralRule.Options.options
+
+      let options = {DisallowedEmbeddedRegexLiteralRule.Options.test_directory= "testData"}
+    end)
+    (TestingLinterOptions)
+
+module DisallowedAttributeRule =
+  DisallowedAttributeRule.Make
+    (struct
+      type options = DisallowedAttributeRule.Options.options
+
+      let options =
+        { DisallowedAttributeRule.Options.attribute= "dead"
+        ; DisallowedAttributeRule.Options.suggestion= Some "Remove, refactor, or mark as @live" }
+    end)
+    (TestingLinterOptions)
 
 type parseResult = {ast: Parsetree.structure; comments: Res_comment.t list}
 
@@ -82,7 +122,7 @@ module Tests = struct
   (* The tests *)
   let disallow_test_1 () =
     let parseResult = parseAst "testData/disallowed_function_rule_test_1.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
@@ -90,9 +130,27 @@ module Tests = struct
         Alcotest.(check string) "Same error message" DisallowStringOfIntRule.meta.ruleDescription msg
     | _ -> Alcotest.fail "Should only have two lint errors"
 
+  let disallow_test_1_warning () =
+    let parseResult = parseAst "testData/disallowed_function_rule_test_1.res" in
+    let errors, warnings =
+      Linter.lint
+        [(module DisallowStringOfIntRuleWarning : Rule.HASRULE)]
+        parseResult.ast parseResult.comments
+    in
+    match (errors, warnings) with
+    | [], [(msg, _); _] ->
+        Alcotest.(check string) "Same error message" DisallowStringOfIntRule.meta.ruleDescription msg
+    | errors, warnings ->
+        Alcotest.fail
+          ( "Should only have two lint warnings, there were "
+          ^ string_of_int (List.length errors)
+          ^ " errors found and "
+          ^ string_of_int (List.length warnings)
+          ^ " warnings found" )
+
   let disallow_test_2 () =
     let parseResult = parseAst "testData/disallowed_function_rule_test_2.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
@@ -101,7 +159,7 @@ module Tests = struct
 
   let disable_lint_test () =
     let parseResult = parseAst "testData/disabled_lint_test_1.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
@@ -110,7 +168,7 @@ module Tests = struct
 
   let disable_lint_per_rule_test () =
     let parseResult = parseAst "testData/disabled_lint_test_2.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module DisallowStringOfIntRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
@@ -119,7 +177,7 @@ module Tests = struct
 
   let disable_lint_per_rule_specific_test () =
     let parseResult = parseAst "testData/disabled_lint_test_3.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint
         [(module DisallowStringOfIntRule : Rule.HASRULE); (module DisallowInOfStringOptRule : Rule.HASRULE)]
         parseResult.ast parseResult.comments
@@ -130,7 +188,7 @@ module Tests = struct
 
   let disabled_multiple_lints_test () =
     let parseResult = parseAst "testData/disabled_multiple_rules_test.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint
         [ (module DisallowStringOfIntRule : Rule.HASRULE)
         ; (module DisallowInOfStringOptRule : Rule.HASRULE)
@@ -145,7 +203,7 @@ module Tests = struct
 
   let no_react_component_test_1 () =
     let parseResult = parseAst "testData/no_react_component_test_1.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module NoInputComponentRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
@@ -154,7 +212,7 @@ module Tests = struct
 
   let no_react_component_test_2 () =
     let parseResult = parseAst "testData/no_react_component_test_2.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module NoInnerComponentRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     match errors with
@@ -163,28 +221,34 @@ module Tests = struct
 
   let disallow_module_test_1 () =
     let parseResult = parseAst "testData/disallow_module_test_1.res" in
-    let errors = Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors, _warnings =
+      Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [_; _] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
 
   let disallow_module_test_2 () =
     let parseResult = parseAst "testData/disallow_module_test_2.res" in
-    let errors = Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors, _warnings =
+      Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [_; _] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
 
   let disallow_module_test_3 () =
     let parseResult = parseAst "testData/disallow_module_test_3.res" in
-    let errors = Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments in
+    let errors, _warnings =
+      Linter.lint [(module NoCSSModuleRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
     match errors with
     | [_; _] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
 
   let disallowed_embedded_regex_literal_test () =
     let parseResult = parseAst "testData/disallowed_embedded_regex_literal_test.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint
         [(module DisallowedEmbeddedRegexLiteralRule : Rule.HASRULE)]
         parseResult.ast parseResult.comments
@@ -195,7 +259,7 @@ module Tests = struct
 
   let disallowed_dead_code_test () =
     let parseResult = parseAst "testData/disallowed_dead_code_test.res" in
-    let errors =
+    let errors, _warnings =
       Linter.lint [(module DisallowedAttributeRule : Rule.HASRULE)] parseResult.ast parseResult.comments
     in
     let expectedDeadTypes =
@@ -253,6 +317,8 @@ let () =
     [ ( "Disallow Function Rule"
       , [ test_case "Lint only functions" `Quick Tests.disallow_test_1
         ; test_case "Does not lint variable with the same function name" `Quick Tests.disallow_test_2 ] )
+    ; ( "Warning Lint Rule"
+      , [test_case "Lint only functions (as warning)" `Quick Tests.disallow_test_1_warning] )
     ; ( "Disable lint test"
       , [ test_case "Disable lint" `Quick Tests.disable_lint_test
         ; test_case "Disable lint per rule" `Quick Tests.disable_lint_per_rule_test

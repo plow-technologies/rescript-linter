@@ -1,5 +1,20 @@
 # ReScript Linter Changelog
 
+### 2025-09-24 - v0.3.2
+* Adds support for warning level lints
+  * To enable a rule as a warning, add `"warning": true` to the rule in the config file
+  * Example:
+    ```json
+    {
+      "rule": "DisallowAttribute",
+      "options": {
+        "attribute": "dead"
+      },
+      "warning": true
+    }
+    ```
+  * This will report any code tagged with `@dead` as a warning instead of an error which is the default behavior
+
 ### 2025-09-23 - v0.3.1
 * Added a `DisallowAttribute` rule to disallow code tagged with an @attribute
   * Requires :

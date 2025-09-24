@@ -86,6 +86,24 @@ or run it with Nix (flakes),
 nix run .#rescript-linter -- -c config.json foo.res
 ```
 
+### Use Warning Lints
+
+By default each lint rule will report as a Lint Error. You can change this behavior by adding a `warning` field to the rule config. Example:
+
+```json
+    {
+      "rule": "DisallowAttribute",
+      "options": {
+        "attribute": "dead"
+      },
+      "warning": true
+    }
+```
+
+Setting `warning` to `false` will follow the default behavior of reporting the lint as an error.
+
+If a lint response only contains warnings the exit code will still be successful for ease of integration with other CI systems.
+
 ### Disabling lint
 
 You can disable lint per file. Simply add `RSLINT_DISABLE` comment at the top of your file to disable lint for all rules.
