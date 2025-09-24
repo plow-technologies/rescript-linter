@@ -2,7 +2,10 @@ module Options = struct
   type options = {component_name: string; suggested_component_name: string option}
 end
 
-module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
+module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOptions : Rule.LinterOptions) :
+  Rule.HASRULE = struct
+  include LinterOptions
+
   let disallowed_component_name = OPT.options.Options.component_name
 
   let optional_suggested_component_name = OPT.options.Options.suggested_component_name

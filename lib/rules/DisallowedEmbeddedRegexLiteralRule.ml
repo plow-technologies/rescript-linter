@@ -90,7 +90,10 @@ module Options = struct
   type options = {test_directory: string}
 end
 
-module Make (OPT : Rule.OPTIONS with type options = Options.options) : Rule.HASRULE = struct
+module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOptions : Rule.LinterOptions) :
+  Rule.HASRULE = struct
+  include LinterOptions
+
   let description =
     "[Rescript] Do not use %re(...) directly, please store it in variable before use so that it can be \
      tested."

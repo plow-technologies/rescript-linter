@@ -86,9 +86,14 @@ let withClassTypeDeclaration iterator f callback =
         (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
         iterator.Ast_iterator.class_type_declaration iterator1 class_type_declaration ) }
 
-let makeIterator rules callback =
+(* Callbacks for linting errors vs warnings *)
+type callbacks = {errorCallback: string * Location.t -> unit; warningCallback: string * Location.t -> unit}
+
+let makeIterator rules callbacks =
   let f iterator rule =
     let module R = (val rule : Rule.HASRULE) in
+    (* Either warn or error, based on the linter options copied to the rule module *)
+    let callback = if R.warning then callbacks.warningCallback else callbacks.errorCallback in
     let buildIterator iterator lint =
       match lint with
       | Rule.LintExpression lintFunc -> withExpression iterator lintFunc callback
