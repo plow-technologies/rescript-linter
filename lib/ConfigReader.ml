@@ -64,6 +64,19 @@ let createDisallowEmbeddedRegexLiteralRule options =
   end) in
   (module M : Rule.HASRULE)
 
+let createDisallowAttributeRule options =
+  let open Yojson.Basic.Util in
+  let attribute = options |> member "attribute" |> to_string in
+  let suggestion =
+    match options |> member "suggestion" with `Null -> None | json -> Some (to_string json)
+  in
+  let module M = DisallowedAttributeRule.Make (struct
+    type options = DisallowedAttributeRule.Options.options
+
+    let options = {DisallowedAttributeRule.Options.suggestion; DisallowedAttributeRule.Options.attribute}
+  end) in
+  (module M : Rule.HASRULE)
+
 let parseConfig path =
   let json = Yojson.Basic.from_file path in
   let open Yojson.Basic.Util in
@@ -85,6 +98,9 @@ let parseConfig path =
     | "DisallowEmbeddedRegexLiteral" ->
         let options = json |> member "options" in
         createDisallowEmbeddedRegexLiteralRule options
+    | "DisallowAttribute" ->
+        let options = json |> member "options" in
+        createDisallowAttributeRule options
     | _ -> raise RuleDoesNotExist
   in
   json |> member "rules" |> to_list |> List.map filter_rule

@@ -1,3 +1,26 @@
+# ReScript Linter Changelog
+
+### 2025-09-23 - v0.3.1
+* Added a `DisallowAttribute` rule to disallow code tagged with an @attribute
+  * Requires :
+    ```json
+    {
+      "rule": "DisallowAttribute",
+      "options": {
+        "attribute": "dead",
+        "suggestion": "Either review and remove the code with, or mark it as @live"
+      }
+    }
+    ```
+  * Currently only tested for `@dead` so this is still experimental
+* Added the following as iteration targets
+  * LintTypeKind
+  * LintLabelDeclaration
+  * LintConstructorDeclaration
+  * LintValueBinding
+  * LintTypeDeclaration
+  * LintModuleBinding
+  * LintClassTypeDeclaration
 
 ### 2024-10-16 - v0.3.0
 * Vendored the compiler subdirector of the rescript compiler repo to support newer syntax within the rescript language. This will allow for better parsing of the AST and better linting going forward

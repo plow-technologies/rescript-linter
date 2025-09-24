@@ -5,8 +5,19 @@ type linter =
   | LintStructure of (Parsetree.structure -> lintResult)
   | LintStructureItem of (Parsetree.structure_item -> lintResult)
   | LintPattern of (Parsetree.pattern -> lintResult)
+  | LintTypeKind of (Parsetree.type_kind -> lintResult)
+  | LintLabelDeclaration of (Parsetree.label_declaration -> lintResult)
+  | LintConstructorDeclaration of (Parsetree.constructor_declaration -> lintResult)
+  | LintValueBinding of (Parsetree.value_binding -> lintResult)
+  | LintTypeDeclaration of (Parsetree.type_declaration -> lintResult)
+  | LintModuleBinding of (Parsetree.module_binding -> lintResult)
+  | LintClassTypeDeclaration of (Parsetree.class_type_declaration -> lintResult)
 
 type meta = {ruleIdentifier: string; ruleName: string; ruleDescription: string}
+
+let meta_to_string meta =
+  Printf.sprintf "{ ruleIdentifier: %s; ruleName: %s; ruleDescription: %s }" meta.ruleIdentifier meta.ruleName
+    meta.ruleDescription
 
 module type HASRULE = sig
   val meta : meta

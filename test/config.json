@@ -1,6 +1,12 @@
 {
   "rules": [
     {
+      "rule": "DisallowAttribute",
+      "options": {
+        "attribute": "dead"
+      }
+    },
+    {
       "rule": "DisallowOperator",
       "options": {
         "disallowed_operator": "|>",
