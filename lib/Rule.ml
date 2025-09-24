@@ -28,9 +28,9 @@ let meta_to_string meta =
     meta.ruleDescription
 
 module type HASRULE = sig
-  val meta : meta
+  include LinterOptions
 
-  val warning : bool
+  val meta : meta
 
   val linters : linter list
 end
