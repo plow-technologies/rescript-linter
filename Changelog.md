@@ -1,5 +1,14 @@
 # ReScript Linter Changelog
 
+### 2025-09-30 - v0.3.3
+* Adds support for JSON output
+  * To enable JSON output, use the `--json` flag when running the linter
+  * Example:
+    ```bash
+    rescript-linter --json --config path/to/config.json path/to/source/files
+    ```
+  * This will output the linting results in JSON format to stdout
+
 ### 2025-09-24 - v0.3.2
 * Adds support for warning level lints
   * To enable a rule as a warning, add `"warning": true` to the rule in the config file

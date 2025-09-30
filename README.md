@@ -1,8 +1,32 @@
+<!-- omit in toc -->
 # ReScript Linter
 
 An AST based linter for ReScript. Write your rule based on ReScript AST.
 
 [![asciicast](https://asciinema.org/a/f71oYaBZ0tisjpQX7hBeyvuck.svg)](https://asciinema.org/a/f71oYaBZ0tisjpQX7hBeyvuck?autoplay=1&loop=1)
+
+<!-- omit in toc -->
+## Table of Contents
+
+- [Building the project](#building-the-project)
+  - [To run the test](#to-run-the-test)
+- [Running the parser](#running-the-parser)
+  - [Config file](#config-file)
+  - [JSON Output](#json-output)
+    - [Schema](#schema)
+    - [Example](#example)
+  - [Use Warning Lints](#use-warning-lints)
+  - [Disabling lint](#disabling-lint)
+- [Rules](#rules)
+  - [Writing your own rule](#writing-your-own-rule)
+    - [Rule interface](#rule-interface)
+    - [Rule with options](#rule-with-options)
+    - [Rule configuration parser](#rule-configuration-parser)
+  - [AST](#ast)
+    - [Printing the AST](#printing-the-ast)
+    - [Understanding the AST](#understanding-the-ast)
+    - [Walking the AST](#walking-the-ast)
+
 
 ## Building the project
 
@@ -31,7 +55,17 @@ nix flake check
 
 ## Running the parser
 
+Once you build the project, you can copy the resulting binary. Or you can also run it with `dune`
 
+```
+dune exec -- rescript_linter -c config.json foo.res
+```
+
+or run it with Nix (flakes),
+
+```
+nix run .#rescript-linter -- -c config.json foo.res
+```
 
 ### Config file
 
@@ -74,17 +108,48 @@ You can set rules that you want to lint using config file. See below for list of
 }
 ```
 
-Once you build the project, you can copy the resulting binary. Or you can also run it with `dune`
 
-```
-dune exec -- rescript_linter -c config.json foo.res
+
+### JSON Output
+
+Passing in the `--json` flag will output the linting results in JSON format to stdout. 
+
+#### Schema
+
+See the [Output JSON Schema](./docs/output.schema.json)
+
+#### Example
+
+```json
+{
+  "errors": [
+    //...
+  ],
+  "warnings": [
+    {
+      "message": "<Output message of the linter for this warning>",
+      "location": {
+        "loc_start": {
+          "pos_fname": "relative/path/to/file.ext",
+          "pos_lnum": 1,
+          "pos_bol": 0,
+          "pos_cnum": 13
+        },
+        "loc_end": {
+          "pos_fname": "relative/path/to/file.ext",
+          "pos_lnum": 1,
+          "pos_bol": 0,
+          "pos_cnum": 18
+        },
+        "loc_ghost": false
+      },
+      "pretty": "<Rendered OCaml output with colors>",
+    },
+    // ...
+  ]
+}
 ```
 
-or run it with Nix (flakes),
-
-```
-nix run .#rescript-linter -- -c config.json foo.res
-```
 
 ### Use Warning Lints
 
@@ -156,13 +221,14 @@ Rules are built-in in the project. Currently there's no pluggable architecture t
 
 Rules are defined in `lib/rules`.
 
-Currently, there are five rules available:
+Currently, there are six rules available:
 
 1. `DisallowFunction` - Disallow the use of certain functions like `string_of_int`
 2. `DisallowOperator` - Disallow the use of certain operators like `|>`
 3. `NoJStringInterpolation` - Disallow the use of j-string Interpolation
 4. `NoReactComponent` - Disallow use of certain React component/dom
 5. `DisallowModule` - Disallow use of certain module
+6. `DisallowAttribute` - Disallow code tagged with a certain attribute like `@dead`
 
 ### Writing your own rule
 
@@ -178,6 +244,7 @@ type linter =
   | LintStructure of (Parsetree.structure -> lintResult)
   | LintStructureItem of (Parsetree.structure_item -> lintResult)
   | LintPattern of (Parsetree.pattern -> lintResult)
+  (* | ... *)
 
 module type HASRULE = sig
   val meta : meta
@@ -236,7 +303,7 @@ end)
 
 You can add the parser that parses JSON config in `ConfigReader.ml`. That way the config will read the correct rules that you defined.
 
-### Understanding the AST
+### AST
 
 #### Printing the AST
 
@@ -249,7 +316,7 @@ let txt = j`hello`
 
 `AST`
 ```
-$ rescript -print ast test.res
+$ bsc -dparsetree test.res
 [
   structure_item (test.res[1,0+0]..[1,0+18])
     Pstr_value Nonrec
@@ -265,7 +332,7 @@ $ rescript -print ast test.res
 ]
 ```
 
-#### AST
+#### Understanding the AST
 
 The complete AST types can be found in [https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli](https://github.com/rescript-lang/syntax/blob/master/compiler-libs-406/parsetree.mli)
 
