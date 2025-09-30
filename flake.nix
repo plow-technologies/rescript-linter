@@ -46,6 +46,7 @@
             ".ocamlformat"
             "dune-project"
             (nix-filter.lib.inDirectory "bin")
+            (nix-filter.lib.inDirectory "doc")
             (nix-filter.lib.inDirectory "lib")
             (nix-filter.lib.inDirectory "test")
             (nix-filter.lib.inDirectory "jscomp")
@@ -67,6 +68,7 @@
         };
       in
       {
+
         # Exposed packages that can be built or run with `nix build` or
         # `nix run` respectively:
         #
@@ -79,11 +81,26 @@
           #     $ nix build
           #     $ nix run -- <args?>
           #
-          default = self.packages.${system}.rescript-linter;
+          default = legacyPackages.buildEnv {
+            name = "rescript-linter-with-docs";
+            paths = [
+              self.packages.${system}.rescript-linter
+              self.packages.${system}.docs
+            ];
+          };
+
+          # Copies the JSON schema for the linter output to the Nix store
+          # so it can be referenced in other projects by nix.
+          docs = legacyPackages.runCommand "my-config" { } ''
+            # $out is a special variable pointing to the output path in the Nix store
+            # The {...} syntax immediately copies the file path into the script
+            mkdir -p $out/share/docs
+            cp ${./docs/output.schema.json} $out/share/docs/output.schema.json
+          '';
 
           rescript-linter = ocamlPackages.buildDunePackage {
             pname = "rescript_linter";
-            version = "0.3.2";
+            version = "0.3.3";
             duneVersion = "3";
             src = sources.all;
 
@@ -92,6 +109,7 @@
             ];
             buildInputs = [
               ocamlPackages.yojson
+              ocamlPackages.ppx_deriving_yojson
               ocamlPackages.ounit2
               ocamlPackages.alcotest
             ];

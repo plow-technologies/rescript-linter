@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Linting Report",
+  "description": "A report containing linting errors and warnings.",
+  "type": "object",
+  "properties": {
+    "errors": {
+      "description": "A list of linting error objects.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lintIssue"
+      }
+    },
+    "warnings": {
+      "description": "A list of linting warning objects.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lintIssue"
+      }
+    }
+  },
+  "required": [
+    "errors",
+    "warnings"
+  ],
+  "$defs": {
+    "lintIssue": {
+      "description": "Represents a single linting issue (error or warning).",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The description of the issue."
+        },
+        "location": {
+          "$ref": "#/$defs/location"
+        },
+        "pretty": {
+          "type": "string",
+          "description": "A pre-formatted, human-readable version of the issue."
+        }
+      },
+      "required": [
+        "message",
+        "location",
+        "pretty"
+      ]
+    },
+    "location": {
+      "description": "Defines the start and end position of the issue in the source file.",
+      "type": "object",
+      "properties": {
+        "loc_start": {
+          "$ref": "#/$defs/position"
+        },
+        "loc_end": {
+          "$ref": "#/$defs/position"
+        },
+        "loc_ghost": {
+          "type": "boolean",
+          "description": "Indicates if the location is a 'ghost' or virtual location."
+        }
+      },
+      "required": [
+        "loc_start",
+        "loc_end",
+        "loc_ghost"
+      ]
+    },
+    "position": {
+      "description": "Defines a specific character position within a file.",
+      "type": "object",
+      "properties": {
+        "pos_fname": {
+          "type": "string",
+          "description": "The filename."
+        },
+        "pos_lnum": {
+          "type": "integer",
+          "description": "The line number."
+        },
+        "pos_bol": {
+          "type": "integer",
+          "description": "The offset of the beginning of the line."
+        },
+        "pos_cnum": {
+          "type": "integer",
+          "description": "The character number (column) within the line."
+        }
+      },
+      "required": [
+        "pos_fname",
+        "pos_lnum",
+        "pos_bol",
+        "pos_cnum"
+      ]
+    }
+  }
+}

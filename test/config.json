@@ -4,7 +4,8 @@
       "rule": "DisallowAttribute",
       "options": {
         "attribute": "dead"
-      }
+      },
+      "warning": true
     },
     {
       "rule": "DisallowOperator",

@@ -2,4 +2,6 @@
 
 (library
  (name rescript_linter)
- (libraries unix yojson rescript_compiler))
+ (libraries unix yojson ppx_deriving_yojson.runtime rescript_compiler)
+ (preprocess
+  (pps ppx_deriving_yojson)))
