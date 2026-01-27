@@ -127,7 +127,7 @@
 
           rescript-linter = ocamlPackages.buildDunePackage {
             pname = "rescript_linter";
-            version = "0.3.3";
+            version = "0.4.0";
             duneVersion = "3";
             src = sources.all;
 
