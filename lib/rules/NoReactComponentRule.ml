@@ -27,7 +27,8 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
       (fun expr ->
         match expr with
         (* Parse React dom like <input /> *)
-        | { Parsetree.pexp_desc= Pexp_apply {funct = {pexp_desc= Pexp_ident {txt= Longident.Lident ident}}; args = _}
+        | { Parsetree.pexp_desc=
+              Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= Longident.Lident ident}}; args= _}
           ; Parsetree.pexp_attributes= [({Asttypes.txt= "JSX"}, _)]
           ; Parsetree.pexp_loc= loc }
           when ident = disallowed_component_name ->
@@ -36,7 +37,9 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         (* Parse custom React component like <Component /> *)
         | { Parsetree.pexp_desc=
               Pexp_apply
-                {funct = {pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, "createElement")}}; args = _}
+                { funct=
+                    {pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, "createElement")}}
+                ; args= _ }
           ; Parsetree.pexp_attributes= [({Asttypes.txt= "JSX"}, _)]
           ; Parsetree.pexp_loc= loc }
           when ident = disallowed_component_name ->

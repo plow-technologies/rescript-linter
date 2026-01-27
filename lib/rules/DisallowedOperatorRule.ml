@@ -25,8 +25,9 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         match expr with
         (* matches string_of_int(x) *)
         | { Parsetree.pexp_desc=
-              Pexp_apply {funct = {pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}; args = _}
-          }
+              Pexp_apply
+                { funct= {pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}
+                ; args= _ } }
           when ident == op ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )

@@ -60,7 +60,8 @@ let getAllVariablesUsedInJsReTest src =
   let callback (pair : string * Warnings.loc) = variables := !variables @ [pair] in
   let lintFunc expr =
     match expr with
-    | {Parsetree.pexp_desc= Parsetree.Pexp_apply {funct = {pexp_desc= Pexp_ident {txt= exprTxt; loc= expr_loc}}; args = args}}
+    | { Parsetree.pexp_desc=
+          Parsetree.Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= exprTxt; loc= expr_loc}}; args} }
       when contains (intercalate "." (Longident.flatten exprTxt)) "Js.Re.test_" -> (
       match safeHead args with
       | Some (_label, {Parsetree.pexp_desc= Parsetree.Pexp_ident {txt= lident}}) ->
@@ -108,7 +109,7 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
       (fun expr ->
         match expr with
         (* matches some_func(..., %re("regex")) *)
-        | {Parsetree.pexp_desc= Pexp_apply {args = args; _}} when containsRegex args ->
+        | {Parsetree.pexp_desc= Pexp_apply {args; _}} when containsRegex args ->
             (* Rescript_parser.Printast.expression 0 Format.err_formatter expr ; *)
             let inner_loc = find_arg_loc args in
             Rule.LintError (meta.ruleDescription, inner_loc)

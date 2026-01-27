@@ -102,5 +102,5 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     ; lintValueBinding
     ; lintTypeDeclaration
     ; lintModuleBinding ]
-    (*; lintClassTypeDeclaration ] *)
+  (*; lintClassTypeDeclaration ] *)
 end

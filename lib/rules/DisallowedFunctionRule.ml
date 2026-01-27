@@ -25,12 +25,13 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         match expr with
         (* matches string_of_int(x) *)
         | { Parsetree.pexp_desc=
-              Pexp_apply {funct = {pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}; args = _}
-          }
+              Pexp_apply
+                { funct= {pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}
+                ; args= _ } }
           when ident = function_name ->
             Rule.LintError (meta.ruleDescription, loc)
         (* matches x->string_of_int *)
-        | {Parsetree.pexp_desc= Pexp_apply {args = xs; _}; Parsetree.pexp_loc= loc} -> (
+        | {Parsetree.pexp_desc= Pexp_apply {args= xs; _}; Parsetree.pexp_loc= loc} -> (
             let f expr =
               match expr with
               | Asttypes.Nolabel, {Parsetree.pexp_desc= Pexp_ident {txt= Longident.Lident ident}}
