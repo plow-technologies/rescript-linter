@@ -1,2 +1,0 @@
-module X : MyMod = A 
-include (X : MyMod)

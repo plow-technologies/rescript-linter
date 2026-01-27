@@ -1,1 +1,0 @@
-let %extensionPoint = 1

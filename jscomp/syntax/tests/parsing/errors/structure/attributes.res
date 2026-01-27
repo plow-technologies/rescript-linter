@@ -1,5 +1,0 @@
-module MissingExpression = {
-  @attr
-}
-
-@attrWithNoExpression
