@@ -1,11 +1,14 @@
 (dirs
- bsb
  common
- depends
  flow_parser
  ext
  ml
  syntax)
+
+(library
+  (name compiler)
+  (wrapped false)
+  (libraries ext ml syntax))
 
 (env
  (dev
