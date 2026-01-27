@@ -11,7 +11,7 @@ type linter =
   | LintValueBinding of (Parsetree.value_binding -> lintResult)
   | LintTypeDeclaration of (Parsetree.type_declaration -> lintResult)
   | LintModuleBinding of (Parsetree.module_binding -> lintResult)
-  | LintClassTypeDeclaration of (Parsetree.class_type_declaration -> lintResult)
+  (* | LintClassTypeDeclaration of (Parsetree.class_type_declaration -> lintResult) *)
 
 (* These are additional options that are parsed along side the rule name and the rule-specific options
  * These rules are common to all rules and can be used to modify the behavior of the rule

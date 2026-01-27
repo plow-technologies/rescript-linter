@@ -78,14 +78,6 @@ let withModuleBinding iterator f callback =
         (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
         iterator.Ast_iterator.module_binding iterator1 module_binding ) }
 
-let withClassTypeDeclaration iterator f callback =
-  { iterator with
-    Ast_iterator.class_type_declaration=
-      (fun iterator1 class_type_declaration ->
-        let res = f class_type_declaration in
-        (match res with Rule.LintError (msg, loc) -> callback (msg, loc) | Rule.LintOk -> ()) ;
-        iterator.Ast_iterator.class_type_declaration iterator1 class_type_declaration ) }
-
 (* Callbacks for linting errors vs warnings *)
 type callbacks = {errorCallback: string * Location.t -> unit; warningCallback: string * Location.t -> unit}
 
@@ -106,7 +98,6 @@ let makeIterator rules callbacks =
       | Rule.LintValueBinding lintFunc -> withValueBinding iterator lintFunc callback
       | Rule.LintTypeDeclaration lintFunc -> withTypeDeclaration iterator lintFunc callback
       | Rule.LintModuleBinding lintFunc -> withModuleBinding iterator lintFunc callback
-      | Rule.LintClassTypeDeclaration lintFunc -> withClassTypeDeclaration iterator lintFunc callback
     in
     List.fold_left buildIterator iterator R.linters
   in
