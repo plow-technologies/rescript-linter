@@ -26,23 +26,31 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     Rule.LintExpression
       (fun expr ->
         match expr with
-        (* Parse React dom like <input /> *)
+        (* Parse React dom like <input /> (unary element) *)
         | { Parsetree.pexp_desc=
-              Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= Longident.Lident ident}}; args= _}
-          ; Parsetree.pexp_attributes= [({Asttypes.txt= "JSX"}, _)]
+              Pexp_jsx_element (Jsx_unary_element {jsx_unary_element_tag_name= {txt= JsxLowerTag name; _}; _})
           ; Parsetree.pexp_loc= loc }
-          when ident = disallowed_component_name ->
-            print_endline ident ;
+          when name = disallowed_component_name ->
             Rule.LintError (meta.ruleDescription, loc)
-        (* Parse custom React component like <Component /> *)
+        (* Parse React dom like <input>...</input> (container element) *)
         | { Parsetree.pexp_desc=
-              Pexp_apply
-                { funct=
-                    {pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, "createElement")}}
-                ; args= _ }
-          ; Parsetree.pexp_attributes= [({Asttypes.txt= "JSX"}, _)]
+              Pexp_jsx_element
+                (Jsx_container_element {jsx_container_element_tag_name_start= {txt= JsxLowerTag name; _}; _})
           ; Parsetree.pexp_loc= loc }
-          when ident = disallowed_component_name ->
+          when name = disallowed_component_name ->
+            Rule.LintError (meta.ruleDescription, loc)
+        (* Parse custom React component like <Component /> (unary element) *)
+        | { Parsetree.pexp_desc=
+              Pexp_jsx_element (Jsx_unary_element {jsx_unary_element_tag_name= {txt= JsxUpperTag path; _}; _})
+          ; Parsetree.pexp_loc= loc }
+          when String.concat "." (Longident.flatten path) = disallowed_component_name ->
+            Rule.LintError (meta.ruleDescription, loc)
+        (* Parse custom React component like <Component>...</Component> (container element) *)
+        | { Parsetree.pexp_desc=
+              Pexp_jsx_element
+                (Jsx_container_element {jsx_container_element_tag_name_start= {txt= JsxUpperTag path; _}; _})
+          ; Parsetree.pexp_loc= loc }
+          when String.concat "." (Longident.flatten path) = disallowed_component_name ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 
