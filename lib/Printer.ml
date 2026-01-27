@@ -60,27 +60,25 @@ module PrettyPrint = struct
 
   let header_of_message_kind = function `error -> "-- Lint Error! --" | `warning -> "-- Lint Warning --"
 
-  let print message_kind src msg d =
+  let print message_kind _src msg d =
     Misc.Color.setup !Clflags.color ;
     Code_frame.setup !Clflags.color ;
-    Format.fprintf Format.std_formatter "@[<v>@,  %a@,  %s@,@]"
-      (Location.print ~src:(Some src) ~message_kind (header_of_message_kind message_kind))
+    Format.fprintf Format.std_formatter "@[<v>@,  %s@,  %a@,  %s@,@]"
+      (header_of_message_kind message_kind)
+      Location.print_loc
       Location.{loc_start= d.loc_start; loc_end= d.loc_end; loc_ghost= false}
-      msg ;
-    List.iter
-      (Format.fprintf Format.std_formatter "@,@[%a@]" (Location.default_error_reporter ~src:(Some src)))
-      []
+      msg
 
-  let asOutput message_kind src msg d =
+  let asOutput message_kind _src msg d =
     let buf = Buffer.create 128 in
     let fmt = Format.formatter_of_buffer buf in
     Misc.Color.setup !Clflags.color ;
     Code_frame.setup !Clflags.color ;
-    Format.fprintf fmt "@[<v>@,  %a@,  %s@,@]"
-      (Location.print ~src:(Some src) ~message_kind (header_of_message_kind message_kind))
+    Format.fprintf fmt "@[<v>@,  %s@,  %a@,  %s@,@]"
+      (header_of_message_kind message_kind)
+      Location.print_loc
       Location.{loc_start= d.loc_start; loc_end= d.loc_end; loc_ghost= false}
       msg ;
-    List.iter (Format.fprintf fmt "@,@[%a@]" (Location.default_error_reporter ~src:(Some src))) [] ;
     Format.pp_print_flush fmt () ;
     Buffer.contents buf
 

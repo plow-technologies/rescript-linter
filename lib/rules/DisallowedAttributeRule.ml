@@ -59,9 +59,6 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         | Pstr_modtype mtd -> makeResult "module type" description_with_type mtd.pmtd_attributes
         | Pstr_open open_declaration ->
             makeResult "open" description_with_type open_declaration.popen_attributes
-        | Pstr_class () -> Rule.LintOk
-        (* Handled by lintClassTypeDeclaration *)
-        | Pstr_class_type _class_type_decls -> Rule.LintOk
         | Pstr_include include_declaration ->
             makeResult "include" description_with_type include_declaration.pincl_attributes
         | Pstr_attribute attr -> makeResult "attribute" description_with_type [attr]
@@ -91,8 +88,10 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
   let lintModuleBinding =
     Rule.LintModuleBinding (fun mb -> makeResult "module" description_with_type mb.pmb_attributes)
 
+  (*
   let lintClassTypeDeclaration =
     Rule.LintClassTypeDeclaration (fun ctd -> makeResult "class type" description_with_type ctd.pci_attributes)
+  *)
 
   let linters =
     [ lintExpresion
@@ -102,6 +101,6 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     ; lintLabelDeclaration
     ; lintValueBinding
     ; lintTypeDeclaration
-    ; lintModuleBinding
-    ; lintClassTypeDeclaration ]
+    ; lintModuleBinding ]
+  (*; lintClassTypeDeclaration ] *)
 end

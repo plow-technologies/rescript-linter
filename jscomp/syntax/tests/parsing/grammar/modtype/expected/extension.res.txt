@@ -1,3 +1,0 @@
-module type T  = [%ext ]
-module type T  = [%ext.with.args {js|argument|js}]
-module type T  = (([%ext ])[@attr ])

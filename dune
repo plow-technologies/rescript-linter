@@ -1,4 +1,4 @@
-(dirs bin lib jscomp test)
+(dirs bin lib compiler test)
 
 (env
  (dev

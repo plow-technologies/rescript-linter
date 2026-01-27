@@ -1,3 +1,0 @@
-[@@@standaloneAttribute ]
-[@@@standaloneAttribute {js|with payload|js}]
-[@@@standaloneAttribute fun x -> x + 1]

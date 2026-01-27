@@ -1,3 +1,0 @@
-RootView.init()
-
-//int

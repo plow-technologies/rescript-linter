@@ -1,3 +1,0 @@
-type nonrec t = x constraint 'x = int
-type nonrec t = x constraint 'x = string constraint 'y = unit
-type nonrec t = x constraint 'a = ((typExpr)[@attr ])

@@ -1,5 +1,8 @@
 # ReScript Linter Changelog
 
+### 2026-01-27 - v0.4.0
+* Updated the AST to ReScript v12.1.0
+
 ### 2025-09-30 - v0.3.3
 * Adds support for JSON output
   * To enable JSON output, use the `--json` flag when running the linter

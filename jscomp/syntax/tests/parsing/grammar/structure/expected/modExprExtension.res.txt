@@ -1,4 +1,0 @@
-module A = [%modExprExtension ]
-module B = [%mod.expr.extension ]
-module C = [%mod.expr.extension.with.args {js|argument|js}]
-module D = [%mod.expr.extension.with.args fun x -> f x]

@@ -29,6 +29,33 @@
         # Library functions from nixpkgs
         lib = legacyPackages.lib;
 
+        # Custom flow_parser package from rescript-lang fork
+        flow_parser = ocamlPackages.buildDunePackage {
+          pname = "flow_parser";
+          version = "0.267.0";
+          duneVersion = "3";
+
+          src = legacyPackages.fetchFromGitHub {
+            owner = "rescript-lang";
+            repo = "flow";
+            rev = "9ea4062c0b7e037415c4413a7634c459ebd5c31b";
+            sha256 = "sha256-jm8FCscyeBQMyObi90sCMiKFXxh4EHt/3nYWit4qwFs=";
+          };
+
+          buildInputs = [
+            ocamlPackages.ppx_deriving
+            ocamlPackages.ppx_gen_rec
+          ];
+
+          propagatedBuildInputs = [
+            ocamlPackages.base
+            ocamlPackages.ppxlib
+            ocamlPackages.wtf8
+          ];
+
+          strictDeps = true;
+        };
+
         project-sources = nix-filter.lib {
           root = ./.;
           include = [
@@ -49,7 +76,7 @@
             (nix-filter.lib.inDirectory "doc")
             (nix-filter.lib.inDirectory "lib")
             (nix-filter.lib.inDirectory "test")
-            (nix-filter.lib.inDirectory "jscomp")
+            (nix-filter.lib.inDirectory "compiler")
           ];
         };
 
@@ -100,7 +127,7 @@
 
           rescript-linter = ocamlPackages.buildDunePackage {
             pname = "rescript_linter";
-            version = "0.3.3";
+            version = "0.4.0";
             duneVersion = "3";
             src = sources.all;
 
@@ -108,6 +135,7 @@
               ocamlPackages.cppo
             ];
             buildInputs = [
+              flow_parser
               ocamlPackages.yojson
               ocamlPackages.ppx_deriving_yojson
               ocamlPackages.ounit2

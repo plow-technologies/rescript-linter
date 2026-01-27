@@ -1,0 +1,31 @@
+(dirs
+ common
+ flow_parser
+ ext
+ ml
+ syntax)
+
+(library
+  (name compiler)
+  (wrapped false)
+  (libraries ext ml syntax))
+
+(env
+ (dev
+  (env-vars
+   (CPPO_FLAGS -U=RELEASE)))
+ (release
+  (env-vars
+   (CPPO_FLAGS -D=RELEASE))
+  (ocamlopt_flags
+   (:standard -O3 -unbox-closures)))
+ (static
+  (env-vars
+   (CPPO_FLAGS -D=RELEASE))
+  (ocamlopt_flags
+   (:standard -O3 -unbox-closures)))
+ (browser
+  (env-vars
+   (CPPO_FLAGS -D=BROWSER))
+  (ocamlopt_flags
+   (:standard -O3 -unbox-closures))))

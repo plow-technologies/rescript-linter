@@ -2,7 +2,7 @@
 
 (name rescript_linter)
 
-(version 0.3.3)
+(version 0.4.0)
 
 (generate_opam_files true)
 
@@ -19,4 +19,4 @@
  (name rescript_linter)
  (synopsis "AST-based linter for ReScript")
  (description "AST-based linter for ReScript")
- (depends dune yojson))
+ (depends dune yojson flow_parser))

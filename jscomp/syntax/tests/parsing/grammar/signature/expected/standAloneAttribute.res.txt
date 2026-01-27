@@ -1,6 +1,0 @@
-module type StandaloneAttribute  =
-  sig
-    [@@@standaloneAttribute ]
-    [@@@standaloneAttribute withPayload]
-    [@@@standaloneAttribute fun x -> x]
-  end

@@ -1,7 +1,0 @@
-let 'a' .. 'z' = x
-
-let loop = (i, s) =>
-  switch String.get(s, i) {
-  | '0' .. '9' | '-' => loop (i+1)
-  | _ => s
-  }

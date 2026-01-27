@@ -1,2 +1,0 @@
-type nonrec t = _
-let (t : _) = x

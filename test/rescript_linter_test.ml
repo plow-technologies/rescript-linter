@@ -116,7 +116,7 @@ let parseAst path =
   let src = Linter.processFile path in
   (* if you want to target the printer use: let mode = Res_parser.Default in*)
   let p = Res_parser.make ~mode:Res_parser.Default src path in
-  {ast= Res_core.parseImplementation p; comments= p.comments}
+  {ast= Res_core.parse_implementation p; comments= p.comments}
 
 module Tests = struct
   (* The tests *)

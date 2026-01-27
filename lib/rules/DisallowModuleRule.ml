@@ -69,9 +69,10 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         (* match M.function or M.attribute *)
         | { Parsetree.pexp_desc=
               Pexp_apply
-                ( { pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, _)}
-                  ; Parsetree.pexp_loc= loc }
-                , _ ) }
+                { funct=
+                    { pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, _)}
+                    ; Parsetree.pexp_loc= loc }
+                ; args= _ } }
           when ident = op ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
