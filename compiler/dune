@@ -1,17 +1,9 @@
 (dirs
  bsb
- bsb_exe
- bsb_helper
- bsb_helper_exe
- bsc
  common
- core
  depends
- ext
  flow_parser
- frontend
- gentype
- jsoo
+ ext
  ml
  syntax)
 

@@ -19,4 +19,4 @@
  (name rescript_linter)
  (synopsis "AST-based linter for ReScript")
  (description "AST-based linter for ReScript")
- (depends dune yojson))
+ (depends dune yojson flow_parser))
