@@ -19,23 +19,27 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     ; Rule.ruleIdentifier= "DisallowFunction" ^ "[" ^ function_name ^ "]"
     ; Rule.ruleDescription= description }
 
+  (* Helper function to convert Longident to string *)
+  let rec longident_to_string = function
+    | Longident.Lident s -> s
+    | Longident.Ldot (t, s) -> longident_to_string t ^ "." ^ s
+    | Longident.Lapply (a, b) -> longident_to_string a ^ "(" ^ longident_to_string b ^ ")"
+
   let lintExpression =
     Rule.LintExpression
       (fun expr ->
         match expr with
-        (* matches string_of_int(x) *)
+        (* matches string_of_int(x) or Js.log(x) *)
         | { Parsetree.pexp_desc=
-              Pexp_apply
-                { funct= {pexp_desc= Pexp_ident {txt= Longident.Lident ident}; Parsetree.pexp_loc= loc}
-                ; args= _ } }
-          when ident = function_name ->
+              Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= ident}; Parsetree.pexp_loc= loc}; args= _} }
+          when longident_to_string ident = function_name ->
             Rule.LintError (meta.ruleDescription, loc)
-        (* matches x->string_of_int *)
+        (* matches x->string_of_int or x->Js.log *)
         | {Parsetree.pexp_desc= Pexp_apply {args= xs; _}; Parsetree.pexp_loc= loc} -> (
             let f expr =
               match expr with
-              | Asttypes.Nolabel, {Parsetree.pexp_desc= Pexp_ident {txt= Longident.Lident ident}}
-                when ident = function_name ->
+              | Asttypes.Nolabel, {Parsetree.pexp_desc= Pexp_ident {txt= ident}}
+                when longident_to_string ident = function_name ->
                   true
               | _ -> false
             in

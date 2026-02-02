@@ -1,5 +1,8 @@
 # ReScript Linter Changelog
 
+### 2026-02-02 - v0.4.1
+* Update DisallowModuleRule and DisallowedFunctionRule
+
 ### 2026-01-27 - v0.4.0
 * Updated the AST to ReScript v12.1.0
 

@@ -20,6 +20,29 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     ; Rule.ruleIdentifier= "DisallowModule" ^ "[" ^ op ^ "]"
     ; Rule.ruleDescription= description }
 
+  (* Helper function to convert Longident to string *)
+  let rec longident_to_string = function
+    | Longident.Lident s -> s
+    | Longident.Ldot (t, s) -> longident_to_string t ^ "." ^ s
+    | Longident.Lapply (a, b) -> longident_to_string a ^ "(" ^ longident_to_string b ^ ")"
+
+  (* Extract the module path from a Longident (everything except the last component) *)
+  let extract_module_path = function
+    | Longident.Lident _ -> None
+    | Longident.Ldot (t, _) -> Some (longident_to_string t)
+    | Longident.Lapply (_, _) -> None
+
+  (* Check if a module path matches the disallowed module
+     - Exact match: "Belt" matches "Belt"
+     - Prefix match: "Belt" matches "Belt.List", "Belt.Array", etc.
+     - But "Belt" should NOT match "BeltExtra"
+  *)
+  let matches_disallowed_module module_path =
+    module_path = op
+    || String.length module_path > String.length op
+       && String.sub module_path 0 (String.length op) = op
+       && String.get module_path (String.length op) = '.'
+
   (* There are three cases that we need to handle when linting for module usage (assume M is the module name)
 
      1. open M
@@ -46,19 +69,17 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     Rule.LintStructureItem
       (fun expr ->
         match expr with
-        (* match open M *)
+        (* match open M or open M.N *)
         | { Parsetree.pstr_desc=
-              Parsetree.Pstr_open
-                {Parsetree.popen_lid= {txt= Longident.Lident ident}; Parsetree.popen_loc= loc} }
-          when ident = op ->
+              Parsetree.Pstr_open {Parsetree.popen_lid= {txt= ident}; Parsetree.popen_loc= loc} }
+          when matches_disallowed_module (longident_to_string ident) ->
             Rule.LintError (meta.ruleDescription, loc)
-        (* match J = M *)
+        (* match J = M or J = M.N *)
         | { Parsetree.pstr_desc=
               Parsetree.Pstr_module
                 { Parsetree.pmb_expr=
-                    { Parsetree.pmod_desc= Parsetree.Pmod_ident {txt= Longident.Lident ident}
-                    ; Parsetree.pmod_loc= loc } } }
-          when ident = op ->
+                    {Parsetree.pmod_desc= Parsetree.Pmod_ident {txt= ident}; Parsetree.pmod_loc= loc} } }
+          when matches_disallowed_module (longident_to_string ident) ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 
@@ -66,16 +87,32 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     Rule.LintExpression
       (fun expr ->
         match expr with
-        (* match M.function or M.attribute *)
+        (* match M.function or M.N.function in function calls *)
         | { Parsetree.pexp_desc=
-              Pexp_apply
-                { funct=
-                    { pexp_desc= Pexp_ident {txt= Longident.Ldot (Longident.Lident ident, _)}
-                    ; Parsetree.pexp_loc= loc }
-                ; args= _ } }
-          when ident = op ->
+              Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= ident}; Parsetree.pexp_loc= loc}; args= _} }
+          when match extract_module_path ident with
+               | Some module_path -> matches_disallowed_module module_path
+               | None -> false ->
+            Rule.LintError (meta.ruleDescription, loc)
+        (* match M.Constructor or M.N.Constructor like Belt.Result.Ok *)
+        | {Parsetree.pexp_desc= Pexp_construct ({txt= ident; _}, _); Parsetree.pexp_loc= loc}
+          when match extract_module_path ident with
+               | Some module_path -> matches_disallowed_module module_path
+               | None -> false ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 
-  let linters = [lintStructureItem; lintExpression]
+  let lintPattern =
+    Rule.LintPattern
+      (fun pat ->
+        match pat with
+        (* match M.Constructor or M.N.Constructor in patterns like Belt.Result.Ok(x) *)
+        | {Parsetree.ppat_desc= Ppat_construct ({txt= ident; _}, _); Parsetree.ppat_loc= loc}
+          when match extract_module_path ident with
+               | Some module_path -> matches_disallowed_module module_path
+               | None -> false ->
+            Rule.LintError (meta.ruleDescription, loc)
+        | _ -> Rule.LintOk )
+
+  let linters = [lintStructureItem; lintExpression; lintPattern]
 end
