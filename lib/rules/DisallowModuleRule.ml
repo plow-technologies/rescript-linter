@@ -39,9 +39,9 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
   *)
   let matches_disallowed_module module_path =
     module_path = op
-    || (String.length module_path > String.length op
+    || String.length module_path > String.length op
        && String.sub module_path 0 (String.length op) = op
-       && String.get module_path (String.length op) = '.')
+       && String.get module_path (String.length op) = '.'
 
   (* There are three cases that we need to handle when linting for module usage (assume M is the module name)
 
@@ -77,7 +77,8 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         (* match J = M or J = M.N *)
         | { Parsetree.pstr_desc=
               Parsetree.Pstr_module
-                { Parsetree.pmb_expr= {Parsetree.pmod_desc= Parsetree.Pmod_ident {txt= ident}; Parsetree.pmod_loc= loc} } }
+                { Parsetree.pmb_expr=
+                    {Parsetree.pmod_desc= Parsetree.Pmod_ident {txt= ident}; Parsetree.pmod_loc= loc} } }
           when matches_disallowed_module (longident_to_string ident) ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
@@ -88,19 +89,16 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         match expr with
         (* match M.function or M.N.function in function calls *)
         | { Parsetree.pexp_desc=
-              Pexp_apply
-                {funct= {pexp_desc= Pexp_ident {txt= ident}; Parsetree.pexp_loc= loc}; args= _} }
-          when
-            ( match extract_module_path ident with
-            | Some module_path -> matches_disallowed_module module_path
-            | None -> false ) ->
+              Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= ident}; Parsetree.pexp_loc= loc}; args= _} }
+          when match extract_module_path ident with
+               | Some module_path -> matches_disallowed_module module_path
+               | None -> false ->
             Rule.LintError (meta.ruleDescription, loc)
         (* match M.Constructor or M.N.Constructor like Belt.Result.Ok *)
         | {Parsetree.pexp_desc= Pexp_construct ({txt= ident; _}, _); Parsetree.pexp_loc= loc}
-          when
-            ( match extract_module_path ident with
-            | Some module_path -> matches_disallowed_module module_path
-            | None -> false ) ->
+          when match extract_module_path ident with
+               | Some module_path -> matches_disallowed_module module_path
+               | None -> false ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 
@@ -110,10 +108,9 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
         match pat with
         (* match M.Constructor or M.N.Constructor in patterns like Belt.Result.Ok(x) *)
         | {Parsetree.ppat_desc= Ppat_construct ({txt= ident; _}, _); Parsetree.ppat_loc= loc}
-          when
-            ( match extract_module_path ident with
-            | Some module_path -> matches_disallowed_module module_path
-            | None -> false ) ->
+          when match extract_module_path ident with
+               | Some module_path -> matches_disallowed_module module_path
+               | None -> false ->
             Rule.LintError (meta.ruleDescription, loc)
         | _ -> Rule.LintOk )
 

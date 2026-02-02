@@ -288,9 +288,7 @@ module Tests = struct
     | [_] -> Alcotest.(check pass) "Same error message" [] []
     | errors ->
         Alcotest.fail
-          ( "Should only have one lint error, but got "
-          ^ string_of_int (List.length errors)
-          ^ " errors" )
+          ("Should only have one lint error, but got " ^ string_of_int (List.length errors) ^ " errors")
 
   let disallow_module_test_4 () =
     let parseResult = parseAst "testData/disallow_module_test_4.res" in
@@ -301,7 +299,8 @@ module Tests = struct
     | [_; _; _; _; _] -> Alcotest.(check pass) "Same error message" [] []
     | errors ->
         Alcotest.fail
-          ( "Should have five lint errors (2 Ok + 2 Error in expressions/patterns, plus map function), but got "
+          ( "Should have five lint errors (2 Ok + 2 Error in expressions/patterns, plus map function), but \
+             got "
           ^ string_of_int (List.length errors)
           ^ " errors" )
 
