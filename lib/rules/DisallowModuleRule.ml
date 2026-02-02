@@ -95,13 +95,6 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
             | Some module_path -> matches_disallowed_module module_path
             | None -> false ) ->
             Rule.LintError (meta.ruleDescription, loc)
-        (* match M.value or M.N.value in expressions (not function calls) *)
-        | {Parsetree.pexp_desc= Pexp_ident {txt= ident}; Parsetree.pexp_loc= loc}
-          when
-            ( match extract_module_path ident with
-            | Some module_path -> matches_disallowed_module module_path
-            | None -> false ) ->
-            Rule.LintError (meta.ruleDescription, loc)
         (* match M.Constructor or M.N.Constructor like Belt.Result.Ok *)
         | {Parsetree.pexp_desc= Pexp_construct ({txt= ident; _}, _); Parsetree.pexp_loc= loc}
           when

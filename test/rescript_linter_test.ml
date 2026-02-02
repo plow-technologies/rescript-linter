@@ -30,6 +30,17 @@ module DisallowStringOfIntRuleWarning =
     end)
     (TestingLinterOptionsWarning)
 
+module DisallowJsLogRule =
+  DisallowedFunctionRule.Make
+    (struct
+      type options = DisallowedFunctionRule.Options.options
+
+      let options =
+        { DisallowedFunctionRule.Options.disallowed_function= "Js.log"
+        ; DisallowedFunctionRule.Options.suggested_function= Some "Console.log" }
+    end)
+    (TestingLinterOptions)
+
 module DisallowInOfStringOptRule =
   DisallowedFunctionRule.Make
     (struct
@@ -71,6 +82,28 @@ module NoCSSModuleRule =
       let options =
         { DisallowModuleRule.Options.disallowed_module= "Css"
         ; DisallowModuleRule.Options.suggested_module= Some "CssJS" }
+    end)
+    (TestingLinterOptions)
+
+module DisallowBeltResultRule =
+  DisallowModuleRule.Make
+    (struct
+      type options = DisallowModuleRule.Options.options
+
+      let options =
+        { DisallowModuleRule.Options.disallowed_module= "Belt.Result"
+        ; DisallowModuleRule.Options.suggested_module= Some "Result" }
+    end)
+    (TestingLinterOptions)
+
+module DisallowBeltRule =
+  DisallowModuleRule.Make
+    (struct
+      type options = DisallowModuleRule.Options.options
+
+      let options =
+        { DisallowModuleRule.Options.disallowed_module= "Belt"
+        ; DisallowModuleRule.Options.suggested_module= Some "Core" }
     end)
     (TestingLinterOptions)
 
@@ -139,10 +172,10 @@ module Tests = struct
     in
     match (errors, warnings) with
     | [], [(msg, _); _] ->
-        Alcotest.(check string) "Same error message" DisallowStringOfIntRule.meta.ruleDescription msg
+        Alcotest.(check string) "Same error message" DisallowStringOfIntRuleWarning.meta.ruleDescription msg
     | errors, warnings ->
         Alcotest.fail
-          ( "Should only have two lint warnings, there were "
+          ( "Should only have two lint warnings for string_of_int, there were "
           ^ string_of_int (List.length errors)
           ^ " errors found and "
           ^ string_of_int (List.length warnings)
@@ -246,6 +279,45 @@ module Tests = struct
     | [_; _] -> Alcotest.(check pass) "Same error message" [] []
     | _ -> Alcotest.fail "Should only have two lint error"
 
+  let disallow_qualified_function_test () =
+    let parseResult = parseAst "testData/disallowed_function_rule_test_1.res" in
+    let errors, _warnings =
+      Linter.lint [(module DisallowJsLogRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_] -> Alcotest.(check pass) "Same error message" [] []
+    | errors ->
+        Alcotest.fail
+          ( "Should only have one lint error, but got "
+          ^ string_of_int (List.length errors)
+          ^ " errors" )
+
+  let disallow_module_test_4 () =
+    let parseResult = parseAst "testData/disallow_module_test_4.res" in
+    let errors, _warnings =
+      Linter.lint [(module DisallowBeltResultRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_; _; _; _; _] -> Alcotest.(check pass) "Same error message" [] []
+    | errors ->
+        Alcotest.fail
+          ( "Should have five lint errors (2 Ok + 2 Error in expressions/patterns, plus map function), but got "
+          ^ string_of_int (List.length errors)
+          ^ " errors" )
+
+  let disallow_module_test_5 () =
+    let parseResult = parseAst "testData/disallow_module_test_5.res" in
+    let errors, _warnings =
+      Linter.lint [(module DisallowBeltRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_; _; _] -> Alcotest.(check pass) "Same error message" [] []
+    | errors ->
+        Alcotest.fail
+          ( "Should have three lint errors (Belt.List, Belt.Array, Belt.Option), but got "
+          ^ string_of_int (List.length errors)
+          ^ " errors" )
+
   let disallowed_embedded_regex_literal_test () =
     let parseResult = parseAst "testData/disallowed_embedded_regex_literal_test.res" in
     let errors, _warnings =
@@ -316,7 +388,8 @@ let () =
   run "ReScript Linter"
     [ ( "Disallow Function Rule"
       , [ test_case "Lint only functions" `Quick Tests.disallow_test_1
-        ; test_case "Does not lint variable with the same function name" `Quick Tests.disallow_test_2 ] )
+        ; test_case "Does not lint variable with the same function name" `Quick Tests.disallow_test_2
+        ; test_case "Lint qualified functions (Js.log)" `Quick Tests.disallow_qualified_function_test ] )
     ; ( "Warning Lint Rule"
       , [test_case "Lint only functions (as warning)" `Quick Tests.disallow_test_1_warning] )
     ; ( "Disable lint test"
@@ -330,7 +403,9 @@ let () =
     ; ( "Disallow module"
       , [ test_case "open module" `Quick Tests.disallow_module_test_1
         ; test_case "alias module" `Quick Tests.disallow_module_test_2
-        ; test_case "direct access module" `Quick Tests.disallow_module_test_3 ] )
+        ; test_case "direct access module" `Quick Tests.disallow_module_test_3
+        ; test_case "qualified module with constructors (Belt.Result)" `Quick Tests.disallow_module_test_4
+        ; test_case "module prefix matching (Belt.*)" `Quick Tests.disallow_module_test_5 ] )
     ; ( "Disallowed embedded regex literal"
       , [test_case "Disallowed embedded regex literal" `Quick Tests.disallowed_embedded_regex_literal_test] )
     ; ("Disallowed dead code", [test_case "Disallowed dead code" `Quick Tests.disallowed_dead_code_test]) ]
