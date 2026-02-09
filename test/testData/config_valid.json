@@ -1,0 +1,18 @@
+{
+  "rules": [
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_module": "Belt.Result",
+        "suggested_module": "Result"
+      }
+    },
+    {
+      "rule": "DisallowFunction",
+      "options": {
+        "disallowed_function": "string_of_int",
+        "suggested_function": "Int.toString"
+      }
+    }
+  ]
+}

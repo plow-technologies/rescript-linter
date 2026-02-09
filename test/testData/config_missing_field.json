@@ -1,0 +1,10 @@
+{
+  "rules": [
+    {
+      "rule": "DisallowOperator",
+      "options": {
+        "disallowed_operator": "|>"
+      }
+    }
+  ]
+}

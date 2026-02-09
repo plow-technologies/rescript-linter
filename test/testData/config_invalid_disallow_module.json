@@ -1,0 +1,11 @@
+{
+  "rules": [
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_function": "Js.Json",
+        "suggested_function": "JSON"
+      }
+    }
+  ]
+}
