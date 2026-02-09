@@ -1,5 +1,32 @@
 # ReScript Linter Changelog
 
+### 2026-02-09 - v0.4.2
+* Improved error handling for config file parsing
+  * Added `ConfigParseError` exception with detailed error messages
+  * Config parsing errors now show:
+    * The problematic rule name
+    * Expected field names for each rule type
+    * The full rule configuration that failed to parse
+  * Example error message:
+    ```
+    Config Error: Error parsing rule 'DisallowModule': Expected string, got null
+    Expected fields: disallowed_module, suggested_module
+    Rule config:
+    {
+      "rule": "DisallowModule",
+      "options": {
+        "disallowed_function": "Js.Json",
+        "suggested_function": "JSON"
+      }
+    }
+    ```
+  * Unknown rules now list all valid rule names
+* Added comprehensive tests for config parsing errors
+  * Tests for invalid field names
+  * Tests for unknown rules
+  * Tests for missing required fields
+  * Tests for valid configs
+
 ### 2026-02-02 - v0.4.1
 * Update DisallowModuleRule and DisallowedFunctionRule
 

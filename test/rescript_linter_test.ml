@@ -379,6 +379,43 @@ module Tests = struct
               (List.map
                  (fun (str, loc) -> Printf.sprintf "\t* %s\n\t\t -> %s" str (loc_to_string loc))
                  errors ) )
+
+  (* Config parsing error tests *)
+  let config_invalid_field_names_test () =
+    try
+      let _rules = ConfigReader.parseConfig "testData/config_invalid_disallow_module.json" in
+      Alcotest.fail "Should have raised ConfigParseError for invalid field names"
+    with ConfigReader.ConfigParseError msg ->
+      if contains_substring msg "DisallowModule" && contains_substring msg "disallowed_module" then
+        Alcotest.(check pass) "Correct error message" [] []
+      else Alcotest.fail ("Error message should mention DisallowModule and disallowed_module, but got: " ^ msg)
+
+  let config_unknown_rule_test () =
+    try
+      let _rules = ConfigReader.parseConfig "testData/config_unknown_rule.json" in
+      Alcotest.fail "Should have raised ConfigParseError for unknown rule"
+    with ConfigReader.ConfigParseError msg ->
+      if contains_substring msg "Unknown rule" && contains_substring msg "NonExistentRule" then
+        Alcotest.(check pass) "Correct error message" [] []
+      else Alcotest.fail ("Error message should mention unknown rule, but got: " ^ msg)
+
+  let config_missing_field_test () =
+    try
+      let _rules = ConfigReader.parseConfig "testData/config_missing_field.json" in
+      Alcotest.fail "Should have raised ConfigParseError for missing field"
+    with ConfigReader.ConfigParseError msg ->
+      if contains_substring msg "DisallowOperator" && contains_substring msg "suggested_operator" then
+        Alcotest.(check pass) "Correct error message" [] []
+      else
+        Alcotest.fail ("Error message should mention DisallowOperator and suggested_operator, but got: " ^ msg)
+
+  let config_valid_test () =
+    try
+      let rules = ConfigReader.parseConfig "testData/config_valid.json" in
+      match rules with
+      | [_; _] -> Alcotest.(check pass) "Valid config parsed successfully" [] []
+      | _ -> Alcotest.fail "Should have parsed 2 rules"
+    with ConfigReader.ConfigParseError msg -> Alcotest.fail ("Should not have raised error: " ^ msg)
 end
 
 (* Run it *)
@@ -407,4 +444,9 @@ let () =
         ; test_case "module prefix matching (Belt.*)" `Quick Tests.disallow_module_test_5 ] )
     ; ( "Disallowed embedded regex literal"
       , [test_case "Disallowed embedded regex literal" `Quick Tests.disallowed_embedded_regex_literal_test] )
-    ; ("Disallowed dead code", [test_case "Disallowed dead code" `Quick Tests.disallowed_dead_code_test]) ]
+    ; ("Disallowed dead code", [test_case "Disallowed dead code" `Quick Tests.disallowed_dead_code_test])
+    ; ( "Config parsing errors"
+      , [ test_case "Invalid field names" `Quick Tests.config_invalid_field_names_test
+        ; test_case "Unknown rule" `Quick Tests.config_unknown_rule_test
+        ; test_case "Missing required field" `Quick Tests.config_missing_field_test
+        ; test_case "Valid config" `Quick Tests.config_valid_test ] ) ]
