@@ -1,4 +1,5 @@
 exception RuleDoesNotExist
+exception ConfigParseError of string
 
 type t = {rules: (module Rule.HASRULE) list}
 
@@ -111,42 +112,77 @@ let parseConfig path =
   let json = Yojson.Basic.from_file path in
   let open Yojson.Basic.Util in
   let filter_rule json =
-    (* Parse in the linter options that are common to every rule *)
-    let warning =
-      match json |> member "warning" with `Null -> false (* default to errors *) | json -> to_bool json
-    in
-    let linterOptions =
-      ( module struct
-        let warning = warning
-      end : Rule.LinterOptions )
-    in
-    (* Parse the rule name, this is used to identify the rule being configured
-     * as each rule can have different parsing options
-     *)
-    let rule = json |> member "rule" |> to_string in
-    (* Not all rules are explicitly required to have options
-       * but perhaps in the future we can clean up the code duplication
-       * of parsing options for the rules that do have options
-    *)
-    match rule with
-    | "DisallowOperator" ->
-        let options = json |> member "options" in
-        createDisallowOperatorRule options linterOptions
-    | "DisallowFunction" ->
-        let options = json |> member "options" in
-        createDisallowFunctionRule options linterOptions
-    | "NoReactComponent" ->
-        let options = json |> member "options" in
-        createNoReactComponentRule options linterOptions
-    | "DisallowModule" ->
-        let options = json |> member "options" in
-        createDisallowModuleRule options linterOptions
-    | "DisallowEmbeddedRegexLiteral" ->
-        let options = json |> member "options" in
-        createDisallowEmbeddedRegexLiteralRule options linterOptions
-    | "DisallowAttribute" ->
-        let options = json |> member "options" in
-        createDisallowAttributeRule options linterOptions
-    | _ -> raise RuleDoesNotExist
+    try
+      (* Parse in the linter options that are common to every rule *)
+      let warning =
+        match json |> member "warning" with `Null -> false (* default to errors *) | json -> to_bool json
+      in
+      let linterOptions =
+        ( module struct
+          let warning = warning
+        end : Rule.LinterOptions )
+      in
+      (* Parse the rule name, this is used to identify the rule being configured
+       * as each rule can have different parsing options
+       *)
+      let rule = json |> member "rule" |> to_string in
+      (* Not all rules are explicitly required to have options
+         * but perhaps in the future we can clean up the code duplication
+         * of parsing options for the rules that do have options
+      *)
+      match rule with
+      | "DisallowOperator" ->
+          let options = json |> member "options" in
+          createDisallowOperatorRule options linterOptions
+      | "DisallowFunction" ->
+          let options = json |> member "options" in
+          createDisallowFunctionRule options linterOptions
+      | "NoReactComponent" ->
+          let options = json |> member "options" in
+          createNoReactComponentRule options linterOptions
+      | "DisallowModule" ->
+          let options = json |> member "options" in
+          createDisallowModuleRule options linterOptions
+      | "DisallowEmbeddedRegexLiteral" ->
+          let options = json |> member "options" in
+          createDisallowEmbeddedRegexLiteralRule options linterOptions
+      | "DisallowAttribute" ->
+          let options = json |> member "options" in
+          createDisallowAttributeRule options linterOptions
+      | _ -> raise RuleDoesNotExist
+    with
+    | RuleDoesNotExist ->
+        let rule_name =
+          try json |> member "rule" |> to_string
+          with _ -> "<unknown>"
+        in
+        raise (ConfigParseError (
+          Printf.sprintf "Unknown rule '%s' in config file.\nValid rules are: DisallowOperator, DisallowFunction, DisallowModule, NoReactComponent, DisallowEmbeddedRegexLiteral, DisallowAttribute"
+          rule_name))
+    | Type_error (msg, _) ->
+        let rule_name =
+          try json |> member "rule" |> to_string
+          with _ -> "<unknown>"
+        in
+        let options_hint = match rule_name with
+        | "DisallowOperator" -> "Expected fields: disallowed_operator, suggested_operator"
+        | "DisallowFunction" -> "Expected fields: disallowed_function, suggested_function"
+        | "DisallowModule" -> "Expected fields: disallowed_module, suggested_module"
+        | "NoReactComponent" -> "Expected fields: component, suggested_component"
+        | "DisallowEmbeddedRegexLiteral" -> "Expected fields: test_directory"
+        | "DisallowAttribute" -> "Expected fields: attribute, suggestion (optional)"
+        | _ -> "Please check the rule configuration"
+        in
+        raise (ConfigParseError (
+          Printf.sprintf "Error parsing rule '%s': %s\n%s\nRule config:\n%s"
+          rule_name msg options_hint (Yojson.Basic.pretty_to_string json)))
+    | e ->
+        let rule_name =
+          try json |> member "rule" |> to_string
+          with _ -> "<unknown>"
+        in
+        raise (ConfigParseError (
+          Printf.sprintf "Unexpected error parsing rule '%s': %s\nRule config:\n%s"
+          rule_name (Printexc.to_string e) (Yojson.Basic.pretty_to_string json)))
   in
   json |> member "rules" |> to_list |> List.map filter_rule

@@ -48,7 +48,12 @@ let lintInfo_of_tuple_with_message_kind (message_kind : Printer.PrettyPrint.mess
 type jsonOutput = {errors: lintInfo list; warnings: lintInfo list} [@@deriving yojson]
 
 let run configPath path (outputJson : bool) =
-  let rules = ConfigReader.parseConfig configPath in
+  let rules =
+    try ConfigReader.parseConfig configPath
+    with ConfigReader.ConfigParseError msg ->
+      Printf.eprintf "Config Error: %s\n" msg ;
+      exit 1
+  in
   if not outputJson then
     Format.fprintf Format.std_formatter "Linting rules:\n%s"
       (String.concat "\n"
