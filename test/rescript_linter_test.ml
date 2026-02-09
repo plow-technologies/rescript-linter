@@ -385,35 +385,29 @@ module Tests = struct
     try
       let _rules = ConfigReader.parseConfig "testData/config_invalid_disallow_module.json" in
       Alcotest.fail "Should have raised ConfigParseError for invalid field names"
-    with
-    | ConfigReader.ConfigParseError msg ->
-        if contains_substring msg "DisallowModule" && contains_substring msg "disallowed_module" then
-          Alcotest.(check pass) "Correct error message" [] []
-        else
-          Alcotest.fail
-            ("Error message should mention DisallowModule and disallowed_module, but got: " ^ msg)
+    with ConfigReader.ConfigParseError msg ->
+      if contains_substring msg "DisallowModule" && contains_substring msg "disallowed_module" then
+        Alcotest.(check pass) "Correct error message" [] []
+      else Alcotest.fail ("Error message should mention DisallowModule and disallowed_module, but got: " ^ msg)
 
   let config_unknown_rule_test () =
     try
       let _rules = ConfigReader.parseConfig "testData/config_unknown_rule.json" in
       Alcotest.fail "Should have raised ConfigParseError for unknown rule"
-    with
-    | ConfigReader.ConfigParseError msg ->
-        if contains_substring msg "Unknown rule" && contains_substring msg "NonExistentRule" then
-          Alcotest.(check pass) "Correct error message" [] []
-        else Alcotest.fail ("Error message should mention unknown rule, but got: " ^ msg)
+    with ConfigReader.ConfigParseError msg ->
+      if contains_substring msg "Unknown rule" && contains_substring msg "NonExistentRule" then
+        Alcotest.(check pass) "Correct error message" [] []
+      else Alcotest.fail ("Error message should mention unknown rule, but got: " ^ msg)
 
   let config_missing_field_test () =
     try
       let _rules = ConfigReader.parseConfig "testData/config_missing_field.json" in
       Alcotest.fail "Should have raised ConfigParseError for missing field"
-    with
-    | ConfigReader.ConfigParseError msg ->
-        if contains_substring msg "DisallowOperator" && contains_substring msg "suggested_operator" then
-          Alcotest.(check pass) "Correct error message" [] []
-        else
-          Alcotest.fail
-            ("Error message should mention DisallowOperator and suggested_operator, but got: " ^ msg)
+    with ConfigReader.ConfigParseError msg ->
+      if contains_substring msg "DisallowOperator" && contains_substring msg "suggested_operator" then
+        Alcotest.(check pass) "Correct error message" [] []
+      else
+        Alcotest.fail ("Error message should mention DisallowOperator and suggested_operator, but got: " ^ msg)
 
   let config_valid_test () =
     try
