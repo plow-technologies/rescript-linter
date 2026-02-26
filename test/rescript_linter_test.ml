@@ -359,8 +359,7 @@ module Tests = struct
     let parseResult = parseAst "testData/disallow_module_test_7.res" in
     let errors, _warnings =
       Linter.lint
-        [ (module DisallowBeltListRule : Rule.HASRULE)
-        ; (module DisallowBeltArrayRule : Rule.HASRULE) ]
+        [(module DisallowBeltListRule : Rule.HASRULE); (module DisallowBeltArrayRule : Rule.HASRULE)]
         parseResult.ast parseResult.comments
     in
     (* Expected errors:
@@ -377,8 +376,8 @@ module Tests = struct
     | [_; _; _; _; _; _; _; _] -> Alcotest.(check pass) "Same error message" [] []
     | errors ->
         Alcotest.fail
-          ( "Should have eight lint errors (6 Belt.List + 2 Belt.Array... wait, 7 Belt.List + 1 \
-             Belt.Array), but got "
+          ( "Should have eight lint errors (6 Belt.List + 2 Belt.Array... wait, 7 Belt.List + 1 Belt.Array), \
+             but got "
           ^ string_of_int (List.length errors)
           ^ " errors" )
 
