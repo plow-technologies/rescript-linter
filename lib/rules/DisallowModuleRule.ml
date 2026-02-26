@@ -87,9 +87,8 @@ module Make (OPT : Rule.OPTIONS with type options = Options.options) (LinterOpti
     Rule.LintExpression
       (fun expr ->
         match expr with
-        (* match M.function or M.N.function in function calls *)
-        | { Parsetree.pexp_desc=
-              Pexp_apply {funct= {pexp_desc= Pexp_ident {txt= ident}; Parsetree.pexp_loc= loc}; args= _} }
+        (* match M.function or M.N.function — covers direct calls, pipe targets, and bare references *)
+        | {Parsetree.pexp_desc= Pexp_ident {txt= ident; _}; Parsetree.pexp_loc= loc}
           when match extract_module_path ident with
                | Some module_path -> matches_disallowed_module module_path
                | None -> false ->

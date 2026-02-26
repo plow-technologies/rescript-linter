@@ -107,6 +107,28 @@ module DisallowBeltRule =
     end)
     (TestingLinterOptions)
 
+module DisallowBeltListRule =
+  DisallowModuleRule.Make
+    (struct
+      type options = DisallowModuleRule.Options.options
+
+      let options =
+        { DisallowModuleRule.Options.disallowed_module= "Belt.List"
+        ; DisallowModuleRule.Options.suggested_module= Some "List" }
+    end)
+    (TestingLinterOptions)
+
+module DisallowBeltArrayRule =
+  DisallowModuleRule.Make
+    (struct
+      type options = DisallowModuleRule.Options.options
+
+      let options =
+        { DisallowModuleRule.Options.disallowed_module= "Belt.Array"
+        ; DisallowModuleRule.Options.suggested_module= Some "Array" }
+    end)
+    (TestingLinterOptions)
+
 module DisallowedEmbeddedRegexLiteralRule =
   DisallowedEmbeddedRegexLiteralRule.Make
     (struct
@@ -317,6 +339,49 @@ module Tests = struct
           ^ string_of_int (List.length errors)
           ^ " errors" )
 
+  (* Issue #15: pipe with no extra arguments bypasses DisallowModule lint *)
+  let disallow_module_pipe_no_args_test () =
+    let parseResult = parseAst "testData/disallow_module_test_6.res" in
+    let errors, _warnings =
+      Linter.lint [(module DisallowBeltListRule : Rule.HASRULE)] parseResult.ast parseResult.comments
+    in
+    match errors with
+    | [_; _; _; _] -> Alcotest.(check pass) "Same error message" [] []
+    | errors ->
+        Alcotest.fail
+          ( "Should have four lint errors (direct call, pipe+args, pipe no-args toArray, pipe no-args \
+             length), but got "
+          ^ string_of_int (List.length errors)
+          ^ " errors" )
+
+  (* Issue #15: verify Pexp_apply scenarios still caught after Pexp_ident fix *)
+  let disallow_module_pexp_apply_test () =
+    let parseResult = parseAst "testData/disallow_module_test_7.res" in
+    let errors, _warnings =
+      Linter.lint
+        [ (module DisallowBeltListRule : Rule.HASRULE)
+        ; (module DisallowBeltArrayRule : Rule.HASRULE) ]
+        parseResult.ast parseResult.comments
+    in
+    (* Expected errors:
+       1. Belt.List.toArray  — direct call, single arg
+       2. Belt.List.has      — direct call, multiple args
+       3. Belt.List.map      — pipe with extra args
+       4. Belt.List.toArray  — pipe with no extra args (was the bug)
+       5. Belt.List.toArray  — chained pipe, no-args (was the bug)
+       6. Belt.Array.map     — chained pipe, with args
+       7. Belt.List.toArray  — nested outer call
+       8. Belt.List.map      — nested inner call
+    *)
+    match errors with
+    | [_; _; _; _; _; _; _; _] -> Alcotest.(check pass) "Same error message" [] []
+    | errors ->
+        Alcotest.fail
+          ( "Should have eight lint errors (6 Belt.List + 2 Belt.Array... wait, 7 Belt.List + 1 \
+             Belt.Array), but got "
+          ^ string_of_int (List.length errors)
+          ^ " errors" )
+
   let disallowed_embedded_regex_literal_test () =
     let parseResult = parseAst "testData/disallowed_embedded_regex_literal_test.res" in
     let errors, _warnings =
@@ -441,7 +506,9 @@ let () =
         ; test_case "alias module" `Quick Tests.disallow_module_test_2
         ; test_case "direct access module" `Quick Tests.disallow_module_test_3
         ; test_case "qualified module with constructors (Belt.Result)" `Quick Tests.disallow_module_test_4
-        ; test_case "module prefix matching (Belt.*)" `Quick Tests.disallow_module_test_5 ] )
+        ; test_case "module prefix matching (Belt.*)" `Quick Tests.disallow_module_test_5
+        ; test_case "pipe with no extra args (Issue #15)" `Quick Tests.disallow_module_pipe_no_args_test
+        ; test_case "Pexp_apply still caught (Issue #15)" `Quick Tests.disallow_module_pexp_apply_test ] )
     ; ( "Disallowed embedded regex literal"
       , [test_case "Disallowed embedded regex literal" `Quick Tests.disallowed_embedded_regex_literal_test] )
     ; ("Disallowed dead code", [test_case "Disallowed dead code" `Quick Tests.disallowed_dead_code_test])

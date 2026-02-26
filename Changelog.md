@@ -1,5 +1,10 @@
 # ReScript Linter Changelog
 
+### 2026-02-26 - v0.4.3
+* Fixed DisallowModule rule missing `Pexp_ident` — pipe calls with no extra arguments now correctly trigger lint errors (#15)
+  * `x->Belt.List.toArray` and similar single-argument pipe expressions were silently bypassing the rule
+  * Replaced `Pexp_apply`-only matching with `Pexp_ident` matching to catch all disallowed module references
+
 ### 2026-02-09 - v0.4.2
 * Improved error handling for config file parsing
   * Added `ConfigParseError` exception with detailed error messages
